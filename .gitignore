@@ -1,0 +1,14 @@
+**/node_modules/
+**/bin/
+**/obj/
+**/dist/
+**/.env
+**/.env.*
+**/.vs/
+.vscode/
+_backend_node_respaldo/
+**/appsettings.Development.json
+*.user
+*.suo
+*.sqlite
+*.db
