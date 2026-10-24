@@ -11,6 +11,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtaFlow.Domain", "UtaFlow.D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtaFlow.Infrastructure", "UtaFlow.Infrastructure\UtaFlow.Infrastructure.csproj", "{18B71982-3423-49FA-8ED5-59C0914383D0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{07C2787E-EAC7-C090-1BA3-A61EC2A24D84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtaFlow.AuthTool", "tools\UtaFlow.AuthTool\UtaFlow.AuthTool.csproj", "{E232B371-AA80-4666-8AA5-4943E1522E0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtaFlow.Api.Tests", "UtaFlow.Api.Tests\UtaFlow.Api.Tests.csproj", "{B882ACDC-3240-4537-AECE-8CF625B113DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,8 +75,35 @@ Global
 		{18B71982-3423-49FA-8ED5-59C0914383D0}.Release|x64.Build.0 = Release|Any CPU
 		{18B71982-3423-49FA-8ED5-59C0914383D0}.Release|x86.ActiveCfg = Release|Any CPU
 		{18B71982-3423-49FA-8ED5-59C0914383D0}.Release|x86.Build.0 = Release|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Debug|x64.Build.0 = Debug|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Debug|x86.Build.0 = Debug|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Release|x64.ActiveCfg = Release|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Release|x64.Build.0 = Release|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Release|x86.ActiveCfg = Release|Any CPU
+		{E232B371-AA80-4666-8AA5-4943E1522E0B}.Release|x86.Build.0 = Release|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Debug|x64.Build.0 = Debug|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Debug|x86.Build.0 = Debug|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Release|x64.ActiveCfg = Release|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Release|x64.Build.0 = Release|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Release|x86.ActiveCfg = Release|Any CPU
+		{B882ACDC-3240-4537-AECE-8CF625B113DD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E232B371-AA80-4666-8AA5-4943E1522E0B} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 	EndGlobalSection
 EndGlobal
