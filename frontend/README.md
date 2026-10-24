@@ -1,16 +1,21 @@
-# React + Vite
+﻿# UtaFlow — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interfaz de inicio de sesión en React + Vite, Bootstrap 5 y CSS personalizado, construida a partir de la imagen de referencia.
 
-Currently, two official plugins are available:
+Desde esta carpeta:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```powershell
+npm install
+npm run dev
+```
 
-## React Compiler
+Abre la dirección local que muestre Vite, normalmente `http://localhost:5173`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```powershell
+npm run build
+npm run lint
+```
 
-## Expanding the ESLint configuration
+Esta entrega incluye únicamente el diseño y las validaciones locales. Funciona sin la API; completar el formulario no inicia una sesión. La conexión al backend, JWT y persistencia quedan pendientes.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Consulta el [informe de implementación y verificación](docs/login-frontend.md) para ver archivos, dependencias, diferencias respecto a la referencia y comprobaciones realizadas.
