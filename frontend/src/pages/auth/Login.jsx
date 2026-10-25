@@ -2,6 +2,8 @@ import { useRef, useState } from 'react'
 import AuthIcon from '../../components/auth/AuthIcon.jsx'
 import LoginBranding from '../../components/auth/LoginBranding.jsx'
 import LoginShowcase from '../../components/auth/LoginShowcase.jsx'
+import { useAuth } from '../../context/AuthContext.js'
+import { AuthError } from '../../services/authService.js'
 import './Login.css'
 
 function validate(values) {
@@ -28,10 +30,13 @@ function SecurityFooter() {
 }
 
 export default function Login() {
+  const { login, notice: sessionNotice } = useAuth()
   const [values, setValues] = useState({ correo: '', contrasena: '' })
   const [errors, setErrors] = useState({})
   const [showPassword, setShowPassword] = useState(false)
   const [notice, setNotice] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const submittingRef = useRef(false)
   const correoRef = useRef(null)
   const passwordRef = useRef(null)
 
@@ -42,14 +47,30 @@ export default function Login() {
     setNotice('')
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
+    if (submittingRef.current) return
     const nextErrors = validate(values)
     setErrors(nextErrors)
     setNotice('')
     if (nextErrors.correo) correoRef.current.focus()
     else if (nextErrors.contrasena) passwordRef.current.focus()
-    else setNotice('La conexión con el servidor se implementará en la siguiente etapa. Aún no se ha iniciado ninguna sesión.')
+    else {
+      submittingRef.current = true
+      setIsSubmitting(true)
+      try {
+        await login(values)
+      } catch (error) {
+        if (error.code !== 'CANCELLED') {
+          setNotice(error instanceof AuthError ? error.message : 'Ocurrió un problema al iniciar sesión. Inténtalo nuevamente.')
+        }
+      } finally {
+        setValues((previous) => ({ ...previous, contrasena: '' }))
+        setShowPassword(false)
+        submittingRef.current = false
+        setIsSubmitting(false)
+      }
+    }
   }
 
   return (
@@ -68,14 +89,14 @@ export default function Login() {
             </button>
             <span id="sso-help" className="visually-hidden">Próximamente. El acceso SSO empresarial aún no está disponible.</span>
             <div className="email-divider d-flex align-items-center"><span />O INGRESA CON TU CORREO<span /></div>
-            <form onSubmit={handleSubmit} noValidate aria-label="Inicio de sesión">
+            <form onSubmit={handleSubmit} noValidate aria-label="Inicio de sesión" aria-busy={isSubmitting}>
               <div className="login-field">
                 <label htmlFor="correo" className="form-label">Correo corporativo</label>
                 <div className={`input-shell ${errors.correo ? 'has-error' : ''}`}>
                   <AuthIcon name="at" />
                   <input ref={correoRef} id="correo" name="correo" type="email" className="form-control"
                     placeholder="usuario@empresa.com" autoComplete="username" autoCapitalize="none" spellCheck={false}
-                    value={values.correo} onChange={updateField} required maxLength={200}
+                    value={values.correo} onChange={updateField} required maxLength={200} disabled={isSubmitting}
                     aria-invalid={Boolean(errors.correo)} aria-describedby={errors.correo ? 'correo-error' : undefined} />
                 </div>
                 {errors.correo && <p id="correo-error" className="field-error" role="alert">{errors.correo}</p>}
@@ -91,7 +112,7 @@ export default function Login() {
                   <AuthIcon name="lock" />
                   <input ref={passwordRef} id="contrasena" name="contrasena" type={showPassword ? 'text' : 'password'}
                     className="form-control" placeholder="••••••••••••" autoComplete="current-password"
-                    value={values.contrasena} onChange={updateField} required maxLength={128}
+                    value={values.contrasena} onChange={updateField} required maxLength={128} disabled={isSubmitting}
                     aria-invalid={Boolean(errors.contrasena)} aria-describedby={errors.contrasena ? 'contrasena-error' : undefined} />
                   <button type="button" className="password-toggle" onClick={() => setShowPassword((previous) => !previous)}
                     aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={showPassword} aria-controls="contrasena">
@@ -100,16 +121,16 @@ export default function Login() {
                 </div>
                 {errors.contrasena && <p id="contrasena-error" className="field-error" role="alert">{errors.contrasena}</p>}
               </div>
-              <div className="remember-session form-check" title="Próximamente, al integrar el servicio de autenticación">
-                <input id="remember-session" className="form-check-input" type="checkbox" checked disabled aria-describedby="remember-help" />
+              <div className="remember-session form-check" title="No disponible. La sesión permanece en memoria y se pierde al recargar la página.">
+                <input id="remember-session" className="form-check-input" type="checkbox" checked={false} disabled aria-describedby="remember-help" />
                 <label className="form-check-label" htmlFor="remember-session">Recordar esta sesión durante 30 días</label>
-                <span id="remember-help" className="visually-hidden">Opción deshabilitada. Estará disponible cuando se integre el servicio de autenticación.</span>
+                <span id="remember-help" className="visually-hidden">La sesión permanece en memoria hasta su vencimiento. Al recargar, debes volver a iniciar sesión.</span>
               </div>
-              <button type="submit" className="login-submit btn btn-primary d-flex align-items-center justify-content-center">
-                Iniciar Sesión en UtaFlow<AuthIcon name="arrow" />
+              <button type="submit" className="login-submit btn btn-primary d-flex align-items-center justify-content-center" disabled={isSubmitting}>
+                {isSubmitting ? 'Iniciando sesión…' : 'Iniciar Sesión en UtaFlow'}<AuthIcon name="arrow" />
               </button>
               <div className="login-notice" role="status" aria-live="polite" aria-atomic="true">
-                {notice && <p>{notice}</p>}
+                {(notice || sessionNotice) && <p>{notice || sessionNotice}</p>}
               </div>
             </form>
           </div>

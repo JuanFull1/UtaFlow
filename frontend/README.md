@@ -16,6 +16,10 @@ npm run build
 npm run lint
 ```
 
-Esta entrega incluye únicamente el diseño y las validaciones locales. Funciona sin la API; completar el formulario no inicia una sesión. La conexión al backend, JWT y persistencia quedan pendientes.
+El formulario utiliza la API JWT existente. Antes de ejecutar Vite, copia `.env.example` a `.env.local`; configura `VITE_API_BASE_URL=https://localhost:7003` y reinicia Vite si cambia. El backend debe permitir el origen exacto `http://localhost:5173`. Vite utiliza ese puerto sin cambiar automáticamente a otro.
+
+La sesión se mantiene en memoria y se pierde al recargar o cerrar la pestaña. No hay refresh tokens ni opción de recordar sesión durante 30 días. El acceso solo se confirma después de validar la identidad en `/api/auth/me`.
+
+Consulta [integración JWT, ejecución y pruebas](docs/integracion-login-jwt.md) para configurar la API, preparar una cuenta de desarrollo y conocer las verificaciones pendientes. Las pruebas del servicio se ejecutan con `npm test` y usan respuestas HTTP simuladas, sin modificar SQL Server.
 
 Consulta el [informe de implementación y verificación](docs/login-frontend.md) para ver archivos, dependencias, diferencias respecto a la referencia y comprobaciones realizadas.
