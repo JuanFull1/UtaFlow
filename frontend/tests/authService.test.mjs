@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
-import { afterEach, beforeEach, mock, test } from 'node:test'
+import { afterEach, beforeEach, describe, mock, test } from 'node:test'
 
 const source = await readFile(new URL('../src/services/authService.js', import.meta.url), 'utf8')
 // Vite supplies import.meta.env in the browser; only substitute its public URL in this test module.
@@ -35,6 +35,7 @@ function loginResponses(user = usuario, accessToken = jwt()) {
   return accessToken
 }
 
+describe('authService', () => {
 beforeEach(() => {
   service.logout()
   fetchMock = mock.method(globalThis, 'fetch', async () => { throw new Error('Sin respuesta de prueba') })
@@ -89,7 +90,7 @@ test('distingue un fallo de red de un error HTTP', async () => {
   await assert.rejects(service.login(credentials), { code: 'NETWORK', status: 0 })
 })
 
-for (const result of [null, {}, { token: 'inválido', usuario }, { token: jwt() }, { token: jwt(), usuario: { ...usuario, rol: 'USUARIO_FINAL' } }]) {
+for (const result of [null, {}, { token: 'inválido', usuario }, { token: jwt() }, { token: jwt(), usuario: { ...usuario, rol: '' } }]) {
   test(`rechaza una respuesta de login insuficiente (${JSON.stringify(result?.usuario?.rol ?? typeof result?.token)})`, async () => {
     queue(respond(result))
     await assert.rejects(service.login(credentials), { code: 'INVALID_RESPONSE' })
@@ -185,4 +186,82 @@ test('falta de VITE_API_BASE_URL produce un error de configuración', async () =
   const unconfigured = await loadService('')
   await assert.rejects(unconfigured.login(credentials), { code: 'CONFIGURATION' })
   assert.equal(fetchMock.mock.callCount(), 0)
+})
+
+test('publica estado de verificación hasta que /me confirme el acceso', async () => {
+  loginResponses()
+  const pending = service.login(credentials)
+  assert.equal(service.getSnapshot().status, 'verifying')
+  assert.equal(service.getSnapshot().usuario, null)
+  await pending
+  assert.equal(service.getSnapshot().status, 'authenticated')
+  assert.ok(service.getSnapshot().expiresAt > Date.now())
+})
+
+test('403 en /me conserva la identidad y el token, pero bloquea las rutas privadas', async () => {
+  const accessToken = loginResponses()
+  await service.login(credentials)
+  queue(respond({}, 403))
+  await assert.rejects(service.getCurrentUser(), { status: 403 })
+  assert.deepEqual(service.getSnapshot().usuario, usuario)
+  assert.equal(service.getSnapshot().status, 'forbidden')
+  assert.doesNotMatch(service.getSnapshot().notice, /expirado/)
+  queue(respond(usuario))
+  await service.getCurrentUser()
+  assert.equal(fetchMock.mock.calls.at(-1).arguments[1].headers.Authorization, `Bearer ${accessToken}`)
+  assert.equal(service.getSnapshot().status, 'authenticated')
+})
+
+for (const failure of [new TypeError('offline'), respond({}, 503)]) {
+  test(`una interrupción temporal conserva la sesión (${failure instanceof Error ? 'red' : '503'})`, async () => {
+    loginResponses()
+    await service.login(credentials)
+    queue(failure)
+    await assert.rejects(service.getCurrentUser())
+    assert.deepEqual(service.getSnapshot().usuario, usuario)
+    assert.equal(service.getSnapshot().status, 'authenticated')
+    assert.ok(service.getSnapshot().notice)
+  })
+}
+
+test('un fallo de red no restaura permisos después de un 403', async () => {
+  loginResponses()
+  await service.login(credentials)
+  queue(respond({}, 403))
+  await assert.rejects(service.getCurrentUser())
+  queue(new TypeError('offline'))
+  await assert.rejects(service.getCurrentUser())
+  assert.equal(service.getSnapshot().status, 'forbidden')
+})
+
+test('dos verificaciones concurrentes comparten una sola petición a /me', async () => {
+  loginResponses()
+  await service.login(credentials)
+  queue(respond(usuario))
+  const first = service.getCurrentUser()
+  assert.equal(service.getSnapshot().status, 'verifying')
+  assert.equal(first, service.getCurrentUser())
+  await first
+  assert.equal(fetchMock.mock.callCount(), 3)
+})
+
+test('logout durante una reverificación impide restaurar la sesión', async () => {
+  loginResponses()
+  await service.login(credentials)
+  let resolveMe
+  fetchMock.mock.mockImplementation(() => new Promise((resolve) => { resolveMe = resolve }))
+  const pending = service.getCurrentUser()
+  service.logout()
+  resolveMe(respond(usuario))
+  await assert.rejects(pending, { code: 'CANCELLED' })
+  assert.equal(service.getSnapshot().status, 'anonymous')
+  assert.equal(service.getSnapshot().expiresAt, 0)
+})
+
+test('un rol desconocido solo se conserva tras verificar la identidad completa con /me', async () => {
+  const limitedUser = { ...usuario, rol: 'ROL_DESCONOCIDO' }
+  loginResponses(limitedUser)
+  assert.deepEqual(await service.login(credentials), limitedUser)
+  assert.equal(fetchMock.mock.callCount(), 2)
+})
 })

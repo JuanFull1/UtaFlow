@@ -1,9 +1,11 @@
 import LoginBranding from '../../components/auth/LoginBranding.jsx'
 import { useAuth } from '../../context/AuthContext.js'
+import { useNavigate } from 'react-router'
 import './Login.css'
 
 export default function Authenticated() {
-  const { usuario, logout } = useAuth()
+  const { usuario, notice, logout } = useAuth()
+  const navigate = useNavigate()
 
   return (
     <main className="login-page container-fluid">
@@ -18,7 +20,12 @@ export default function Authenticated() {
           <dt>Correo electrónico</dt><dd className="text-break">{usuario.correo}</dd>
           <dt>Rol</dt><dd>{usuario.rol}</dd>
         </dl>
-        <button type="button" className="login-submit btn btn-primary" onClick={logout}>Cerrar sesión</button>
+        <p className="mt-3">Las funciones de tu perfil se incorporarán en próximas etapas.</p>
+        {notice && <p role="status">{notice}</p>}
+        <button type="button" className="login-submit btn btn-primary" onClick={() => {
+          logout()
+          navigate('/login', { replace: true })
+        }}>Cerrar sesión</button>
       </section>
     </main>
   )

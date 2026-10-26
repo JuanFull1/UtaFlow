@@ -1,14 +1,14 @@
 const apiBaseUrl = (import.meta.env?.VITE_API_BASE_URL ?? '').trim().replace(/\/+$/, '')
-const roles = new Set(['EXPERTO', 'COMITE', 'ADMIN'])
 const expiredMessage = 'Tu sesión ha expirado. Vuelve a iniciar sesión.'
 const invalidResponse = 'No fue posible validar la sesión del servidor. Inténtalo nuevamente.'
 let token = null
 let expiresAt = 0
 let expirationTimer
 let pendingLogin = null
+let pendingVerification = null
 let generation = 0
 let controller = new AbortController()
-let snapshot = Object.freeze({ usuario: null, notice: '' })
+let snapshot = Object.freeze({ usuario: null, notice: '', status: 'anonymous', expiresAt: 0 })
 const listeners = new Set()
 
 export class AuthError extends Error {
@@ -20,8 +20,8 @@ export class AuthError extends Error {
   }
 }
 
-function publish(usuario, notice = '') {
-  snapshot = Object.freeze({ usuario: usuario ? Object.freeze({ ...usuario }) : null, notice })
+function publish(usuario, notice = '', status = usuario ? 'authenticated' : 'anonymous') {
+  snapshot = Object.freeze({ usuario: usuario ? Object.freeze({ ...usuario }) : null, notice, status, expiresAt })
   listeners.forEach((listener) => listener())
 }
 
@@ -33,6 +33,7 @@ function clearSession(notice = '') {
   token = null
   expiresAt = 0
   pendingLogin = null
+  pendingVerification = null
   publish(null, notice)
 }
 
@@ -43,7 +44,8 @@ function checkExpiration() {
 function validateUsuario(usuario) {
   if (!usuario || !Number.isSafeInteger(usuario.id) || usuario.id <= 0 ||
     typeof usuario.nombre !== 'string' || !usuario.nombre.trim() ||
-    typeof usuario.correo !== 'string' || !usuario.correo.trim() || !roles.has(usuario.rol)) {
+    typeof usuario.correo !== 'string' || !usuario.correo.trim() ||
+    typeof usuario.rol !== 'string' || !usuario.rol.trim()) {
     throw new AuthError(invalidResponse, 'INVALID_RESPONSE')
   }
   return { id: usuario.id, nombre: usuario.nombre, correo: usuario.correo, rol: usuario.rol }
@@ -121,33 +123,53 @@ function login({ correo, contrasena }) {
   if (pendingLogin) return pendingLogin
   clearSession()
   const currentGeneration = generation
+  publish(null, '', 'verifying')
   pendingLogin = authenticate(correo, contrasena, currentGeneration, controller.signal)
     .finally(() => {
-      if (currentGeneration === generation) pendingLogin = null
+      if (currentGeneration === generation) {
+        pendingLogin = null
+        if (!token) publish(null)
+      }
     })
   return pendingLogin
 }
 
-async function getCurrentUser() {
-  checkExpiration()
-  if (!token) throw new AuthError(expiredMessage, 'EXPIRED')
-  const currentGeneration = generation
+async function verifyCurrentUser(previous, currentGeneration) {
   try {
     const usuario = validateUsuario(await request('me', { accessToken: token, signal: controller.signal }))
     if (generation !== currentGeneration) throw new AuthError('Solicitud cancelada.', 'CANCELLED')
-    if (['id', 'correo', 'rol', 'nombre'].some((key) => usuario[key] !== snapshot.usuario[key])) {
+    if (['id', 'correo', 'rol', 'nombre'].some((key) => usuario[key] !== previous.usuario[key])) {
       throw new AuthError(invalidResponse, 'IDENTITY_MISMATCH')
     }
     checkExpiration()
     if (!token) throw new AuthError(expiredMessage, 'EXPIRED')
+    publish(usuario)
     return usuario
   } catch (error) {
-    if (generation === currentGeneration && (error.status === 401 || error.status === 403 ||
-      error.code === 'INVALID_RESPONSE' || error.code === 'IDENTITY_MISMATCH')) {
-      clearSession(error.status === 401 ? expiredMessage : error.message)
+    if (generation === currentGeneration) {
+      if (error.status === 401 || error.code === 'INVALID_RESPONSE' || error.code === 'IDENTITY_MISMATCH') {
+        clearSession(error.status === 401 ? expiredMessage : error.message)
+      } else {
+        // A forbidden response or a temporary outage does not invalidate the identity.
+        const status = error.status === 403 || previous.status === 'forbidden' ? 'forbidden' : 'authenticated'
+        publish(previous.usuario, error.message, status)
+      }
     }
     throw error
   }
+}
+
+function getCurrentUser() {
+  checkExpiration()
+  if (!token) return Promise.reject(new AuthError(expiredMessage, 'EXPIRED'))
+  if (pendingVerification) return pendingVerification
+  const currentGeneration = generation
+  const previous = snapshot
+  publish(previous.usuario, '', 'verifying')
+  pendingVerification = verifyCurrentUser(previous, currentGeneration).finally(() => {
+    if (generation === currentGeneration) pendingVerification = null
+  })
+  return pendingVerification
 }
 
 export const authService = {
