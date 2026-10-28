@@ -1,0 +1,169 @@
+
+/* =====================================================
+   UTAFLOW - ACCESO PUBLICO DESDE LOGIN
+   ===================================================== */
+
+.login-page .login-public-access {
+  width: 100%;
+  margin-top: 26px;
+}
+
+/* Separador entre login y solicitudes publicas */
+
+.login-page .public-access-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.login-page .public-access-divider::before,
+.login-page .public-access-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: #dce3ee;
+}
+
+.login-page .public-access-divider span {
+  color: #8492a6;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Contenedor */
+
+.login-page .public-access-content {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 18px;
+  border: 1px solid #dbe5f2;
+  border-radius: 12px;
+  background: #f7faff;
+}
+
+.login-page .public-access-content h2 {
+  margin: 0;
+  color: #0a1830;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.login-page .public-access-description {
+  margin: 0 0 9px;
+  color: #617595;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* Estilo comun para los dos enlaces */
+
+.login-page .public-access-primary,
+.login-page .public-access-secondary {
+  display: flex;
+  width: 100%;
+  min-height: 49px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 12px 13px;
+  border-radius: 9px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.4;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+/* Registrar solicitud */
+
+.login-page .public-access-primary {
+  border: 1px solid #075af2;
+  background: #075af2;
+  color: #ffffff;
+}
+
+.login-page .public-access-primary:hover {
+  border-color: #0649c7;
+  background: #0649c7;
+  color: #ffffff;
+  box-shadow: 0 5px 13px #075af22a;
+}
+
+/* Consultar solicitud */
+
+.login-page .public-access-secondary {
+  border: 1px solid #cbd8ec;
+  background: #ffffff;
+  color: #174a8b;
+}
+
+.login-page .public-access-secondary:hover {
+  border-color: #075af2;
+  background: #eef5ff;
+  color: #0752d5;
+}
+
+/* Iconos */
+
+.login-page .public-access-icon {
+  display: flex;
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.login-page .public-access-primary .public-access-icon {
+  background: #ffffff20;
+  color: #ffffff;
+}
+
+.login-page .public-access-secondary .public-access-icon {
+  background: #eaf2ff;
+  color: #075af2;
+}
+
+.login-page .public-access-arrow {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 17px;
+}
+
+/* Accesibilidad */
+
+.login-page .public-access-primary:focus-visible,
+.login-page .public-access-secondary:focus-visible {
+  outline: 3px solid #7cadff;
+  outline-offset: 3px;
+}
+
+/* Pantallas pequenas */
+
+@media (max-width: 760px) {
+  .login-page .login-public-access {
+    margin-top: 23px;
+  }
+
+  .login-page .public-access-content {
+    padding: 17px 14px;
+  }
+
+  .login-page .public-access-primary,
+  .login-page .public-access-secondary {
+    min-height: 48px;
+    font-size: 12px;
+  }
+}

@@ -83,3 +83,41 @@
   .login-page .input-shell .form-control { font-size: 16px; }
   .login-page .login-showcase { display: none; }
 }
+
+.demo-accounts {
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid #d9dee5;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.demo-accounts h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.demo-accounts-note {
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.demo-account {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.demo-account + .demo-account {
+  border-top: 1px solid #d9dee5;
+}
+
+.demo-account strong {
+  font-size: 14px;
+}
+
