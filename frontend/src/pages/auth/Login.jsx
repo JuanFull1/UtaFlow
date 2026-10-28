@@ -16,19 +16,6 @@ function validate(values) {
   return errors
 }
 
-function SecurityFooter() {
-  return (
-    <footer className="security-footer">
-      <ul className="security-tags list-unstyled d-flex flex-wrap">
-        <li><AuthIcon name="shield" />Acceso protegido</li>
-        <li><AuthIcon name="badge" />Autenticación JWT</li>
-        <li><AuthIcon name="lock" />Control de roles</li>
-      </ul>
-      <p>Acceso mediante autenticación segura y permisos según el rol del usuario.</p>
-    </footer>
-  )
-}
-
 export default function Login() {
   const { login, notice: sessionNotice } = useAuth()
   const [values, setValues] = useState({ correo: '', contrasena: '' })
@@ -79,21 +66,15 @@ export default function Login() {
         <section className="login-panel" aria-labelledby="login-title">
           <LoginBranding />
           <header className="login-intro">
-            <h1 id="login-title">Bienvenido de nuevo</h1>
-            <p>Ingresa con tus credenciales corporativas SSO o correo institucional.</p>
+            <h1 id="login-title">Bienvenido</h1>
+            <p>Inicia sesión para continuar</p>
           </header>
           <div className="login-controls">
-            <button type="button" className="sso-button btn d-flex align-items-center" aria-disabled="true"
-              title="SSO empresarial: próximamente" aria-describedby="sso-help">
-              <AuthIcon name="sso" /><span>Continuar con SSO Empresarial</span><span className="sso-protocol">SAML / OIDC</span>
-            </button>
-            <span id="sso-help" className="visually-hidden">Próximamente. El acceso SSO empresarial aún no está disponible.</span>
-            <div className="email-divider d-flex align-items-center"><span />O INGRESA CON TU CORREO<span /></div>
             <form onSubmit={handleSubmit} noValidate aria-label="Inicio de sesión" aria-busy={isSubmitting}>
               <div className="login-field">
-                <label htmlFor="correo" className="form-label">Correo corporativo</label>
+                <label htmlFor="correo" className="form-label">Correo</label>
                 <div className={`input-shell ${errors.correo ? 'has-error' : ''}`}>
-                  <AuthIcon name="at" />
+                  <svg className="auth-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" /><path d="m4 7 8 6 8-6" /></svg>
                   <input ref={correoRef} id="correo" name="correo" type="email" className="form-control"
                     placeholder="usuario@empresa.com" autoComplete="username" autoCapitalize="none" spellCheck={false}
                     value={values.correo} onChange={updateField} required maxLength={200} disabled={isSubmitting}
@@ -104,9 +85,6 @@ export default function Login() {
               <div className="login-field password-field">
                 <div className="password-label d-flex align-items-center justify-content-between">
                   <label htmlFor="contrasena" className="form-label">Contraseña</label>
-                  <button type="button" className="forgot-password" aria-disabled="true"
-                    title="Recuperación de contraseña: próximamente" aria-describedby="recovery-help">¿Olvidaste tu contraseña?</button>
-                  <span id="recovery-help" className="visually-hidden">Próximamente. La recuperación de contraseña aún no está disponible.</span>
                 </div>
                 <div className={`input-shell ${errors.contrasena ? 'has-error' : ''}`}>
                   <AuthIcon name="lock" />
@@ -115,7 +93,7 @@ export default function Login() {
                     value={values.contrasena} onChange={updateField} required maxLength={128} disabled={isSubmitting}
                     aria-invalid={Boolean(errors.contrasena)} aria-describedby={errors.contrasena ? 'contrasena-error' : undefined} />
                   <button type="button" className="password-toggle" onClick={() => setShowPassword((previous) => !previous)}
-                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={showPassword} aria-controls="contrasena">
+                    disabled={isSubmitting} aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={showPassword} aria-controls="contrasena">
                     <AuthIcon name={showPassword ? 'eyeOff' : 'eye'} />
                   </button>
                 </div>
@@ -123,18 +101,23 @@ export default function Login() {
               </div>
               <div className="remember-session form-check" title="No disponible. La sesión permanece en memoria y se pierde al recargar la página.">
                 <input id="remember-session" className="form-check-input" type="checkbox" checked={false} disabled aria-describedby="remember-help" />
-                <label className="form-check-label" htmlFor="remember-session">Recordar esta sesión durante 30 días</label>
-                <span id="remember-help" className="visually-hidden">La sesión permanece en memoria hasta su vencimiento. Al recargar, debes volver a iniciar sesión.</span>
+                <label className="form-check-label" htmlFor="remember-session">Recordarme</label>
+                <span id="remember-help" className="visually-hidden">Opción no disponible. La sesión permanece en memoria hasta su vencimiento. Al recargar, debes volver a iniciar sesión.</span>
               </div>
               <button type="submit" className="login-submit btn btn-primary d-flex align-items-center justify-content-center" disabled={isSubmitting}>
-                {isSubmitting ? 'Iniciando sesión…' : 'Iniciar Sesión en UtaFlow'}<AuthIcon name="arrow" />
+                {isSubmitting && <span className="spinner-border spinner-border-sm" aria-hidden="true" />}
+                {isSubmitting ? 'Iniciando sesión…' : 'Iniciar sesión'}<AuthIcon name="arrow" />
               </button>
+              <div className="recovery-option">
+                <button type="button" className="forgot-password" aria-disabled="true"
+                  aria-describedby="recovery-help">¿Olvidaste tu contraseña?</button>
+                <span id="recovery-help">Recuperación no disponible. Contacta al administrador.</span>
+              </div>
               <div className="login-notice" role="status" aria-live="polite" aria-atomic="true">
                 {(notice || sessionNotice) && <p>{notice || sessionNotice}</p>}
               </div>
             </form>
           </div>
-          <SecurityFooter />
         </section>
         <LoginShowcase />
       </div>
