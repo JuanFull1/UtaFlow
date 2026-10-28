@@ -7,7 +7,6 @@ export default function LoginBranding() {
       </svg>
       <div>
         <span className="brand-name">UtaFlow</span>
-        <span className="brand-caption">ENTERPRISE RELEASE ORCHESTRATION</span>
       </div>
     </div>
   )
