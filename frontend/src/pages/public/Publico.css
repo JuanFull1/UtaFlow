@@ -1,0 +1,333 @@
+
+.utaflow-publico {
+  min-height: 100vh;
+  padding: 24px 16px 70px;
+  background: #f4f7fc;
+  color: #122340;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.utaflow-publico .public-container {
+  max-width: 970px;
+  margin: 0 auto;
+}
+
+.utaflow-publico .public-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #dce5f1;
+}
+
+.utaflow-publico .public-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.utaflow-publico .public-header a {
+  text-decoration: none;
+  font-size: 14px;
+  color: #075af2;
+}
+
+.utaflow-publico .public-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  background: #102a55;
+  color: white !important;
+  font-weight: 800;
+}
+
+.utaflow-publico .public-brand span {
+  color: white;
+}
+
+.utaflow-publico .public-heading {
+  padding: 42px 0 23px;
+}
+
+.utaflow-publico .public-eyebrow {
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: #075af2;
+}
+
+.utaflow-publico h1 {
+  font-size: clamp(27px, 4vw, 39px);
+  letter-spacing: -0.8px;
+  margin: 9px 0 10px;
+  font-weight: 750;
+}
+
+.utaflow-publico .public-heading p,
+.utaflow-publico .public-success > p {
+  color: #546782;
+  margin: 0;
+  line-height: 1.65;
+}
+
+.utaflow-publico .public-card {
+  background: white;
+  border: 1px solid #dce5f1;
+  border-radius: 16px;
+  padding: clamp(20px, 4vw, 36px);
+  box-shadow: 0 10px 30px #15325b0b;
+}
+
+.utaflow-publico .public-form h2 {
+  font-size: 19px;
+  margin: 2px 0 18px;
+  font-weight: 700;
+}
+
+.utaflow-publico .public-form h2:not(:first-child) {
+  margin-top: 34px;
+  padding-top: 28px;
+  border-top: 1px solid #e2e9f2;
+}
+
+.utaflow-publico .public-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 19px;
+}
+
+.utaflow-publico label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #344860;
+}
+
+.utaflow-publico label .form-control,
+.utaflow-publico label .form-select {
+  margin-top: 8px;
+  padding: 11px 13px;
+  min-height: 45px;
+  font-size: 14px;
+}
+
+.utaflow-publico .public-full {
+  grid-column: 1 / -1;
+}
+
+.utaflow-publico .public-helper {
+  font-size: 12px;
+  color: #62748c;
+  margin: 20px 0;
+}
+
+.utaflow-publico .public-submit {
+  padding: 13px 25px;
+  font-weight: 650;
+}
+
+.utaflow-publico .btn-primary {
+  background: #075af2;
+  border-color: #075af2;
+}
+
+.utaflow-publico .public-success {
+  margin-top: 40px;
+}
+
+.utaflow-publico .public-code-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 13px;
+  padding: 21px;
+  margin: 24px 0 15px;
+  border: 1px solid #dce5f1;
+  border-radius: 11px;
+  background: #f7faff;
+}
+
+.utaflow-publico .public-code-box span {
+  width: 100%;
+  font-size: 13px;
+  color: #62748c;
+}
+
+.utaflow-publico .public-code-box strong {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: clamp(13px, 2vw, 20px);
+  overflow-wrap: anywhere;
+  flex: 1;
+}
+
+.utaflow-publico .public-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.utaflow-publico .public-search {
+  margin-top: 10px;
+}
+
+.utaflow-publico .public-search-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 9px;
+}
+
+.utaflow-publico .public-search-row .form-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.utaflow-publico .public-message,
+.utaflow-publico .public-detail {
+  margin-top: 20px;
+}
+
+.utaflow-publico .public-detail-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.utaflow-publico .public-detail h2 {
+  font-size: 25px;
+  font-weight: 750;
+  margin-top: 8px;
+}
+
+.utaflow-publico .public-detail h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-top: 24px;
+}
+
+.utaflow-publico .public-status {
+  padding: 8px 13px;
+  color: #075af2;
+  background: #ecf3ff;
+  border: 1px solid #d0e0ff;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.utaflow-publico .public-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin: 25px 0;
+  padding: 18px 0;
+  border-block: 1px solid #e2e9f2;
+}
+
+.utaflow-publico dt {
+  font-size: 12px;
+  color: #62748c;
+  font-weight: 500;
+}
+
+.utaflow-publico dd {
+  margin: 3px 0 0;
+  font-weight: 650;
+}
+
+.utaflow-publico .public-preserve {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.utaflow-publico .public-timeline {
+  padding-left: 20px;
+}
+
+.utaflow-publico .public-timeline li {
+  margin: 9px 0;
+}
+
+.utaflow-publico .public-messages article {
+  padding: 16px;
+  background: #f7faff;
+  border: 1px solid #e2e9f2;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.utaflow-publico .public-messages article p {
+  margin: 8px 0;
+}
+
+.utaflow-publico .public-messages small {
+  color: #66788e;
+}
+
+.utaflow-publico .public-response {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e9f2;
+}
+
+.utaflow-publico .public-response textarea {
+  margin: 10px 0 15px;
+}
+
+@media (max-width: 640px) {
+  .utaflow-publico .public-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .utaflow-publico .public-search-row {
+    flex-direction: column;
+  }
+
+  .utaflow-publico .public-search-row button {
+    width: 100%;
+  }
+}
+
+
+/* Evidencias adjuntas del formulario público */
+
+.utaflow-publico .public-evidence {
+  padding: 20px;
+  border: 1px dashed #b8c9e0;
+  border-radius: 12px;
+  background: #f8fbff;
+}
+
+.utaflow-publico .public-evidence p {
+  margin: 0 0 15px;
+  font-size: 14px;
+  color: #526682;
+}
+
+.utaflow-publico .public-evidence .form-control {
+  margin: 9px 0 8px;
+  background: #fff;
+}
+
+.utaflow-publico .public-evidence small {
+  color: #62748c;
+  font-size: 12px;
+}
+
+.utaflow-publico .public-file-list {
+  margin: 14px 0 0;
+  padding-left: 22px;
+  color: #344860;
+  font-size: 13px;
+}
+
+.utaflow-publico .public-file-list li {
+  margin: 5px 0;
+  overflow-wrap: anywhere;
+}

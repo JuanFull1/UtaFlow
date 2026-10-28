@@ -1,8 +1,25 @@
-export const supportedRoles = Object.freeze(['EXPERTO', 'COMITE', 'ADMIN'])
+// Roles internos con sesión.
+// Los usuarios finales siguen utilizando /solicitud
+// sin necesidad de tener una cuenta.
 
-// Unknown or future roles receive no private route permissions.
+export const supportedRoles = Object.freeze([
+  'EXPERTO',
+  'COMITE',
+  'ADMIN',
+])
+
 export function homeForRole(rol) {
-  if (rol === 'EXPERTO') return '/app/experto'
-  if (rol === 'COMITE' || rol === 'ADMIN') return '/app'
-  return '/acceso-denegado'
+  switch (rol) {
+    case 'EXPERTO':
+      return '/app/experto'
+
+    case 'COMITE':
+      return '/app/comite'
+
+    case 'ADMIN':
+      return '/app/admin'
+
+    default:
+      return '/acceso-denegado'
+  }
 }

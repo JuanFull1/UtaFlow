@@ -183,3 +183,211 @@ export const authService = {
     return () => listeners.delete(listener)
   },
 }
+
+
+
+export async function apiAutenticada(ruta, opciones = {}) {
+  authService.checkExpiration()
+
+  if (!token) {
+    throw new AuthError(
+      'Tu sesión ha expirado. Vuelve a iniciar sesión.',
+      'EXPIRED',
+      401
+    )
+  }
+
+  if (!apiBaseUrl) {
+    throw new AuthError(
+      'Configura VITE_API_BASE_URL.',
+      'CONFIGURATION'
+    )
+  }
+
+  const {
+    method = 'GET',
+    body,
+    signal,
+  } = opciones
+
+  let respuesta
+
+  try {
+    respuesta = await fetch(`${apiBaseUrl}${ruta}`, {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...(body === undefined
+          ? {}
+          : { 'Content-Type': 'application/json' }),
+      },
+      ...(body === undefined
+        ? {}
+        : { body: JSON.stringify(body) }),
+      cache: 'no-store',
+      credentials: 'omit',
+      redirect: 'error',
+      signal,
+    })
+  } catch {
+    throw new AuthError(
+      'No se pudo conectar con el servidor.',
+      'NETWORK'
+    )
+  }
+
+  if (respuesta.status === 401) {
+    clearSession(expiredMessage)
+    throw new AuthError(expiredMessage, 'EXPIRED', 401)
+  }
+
+  if (respuesta.status === 403) {
+    throw new AuthError(
+      'No tienes permisos para esta operación.',
+      'FORBIDDEN',
+      403
+    )
+  }
+
+  if (!respuesta.ok) {
+    throw new AuthError(
+      respuesta.status === 409
+        ? 'La solicitud cambió de estado. Actualiza la información.'
+        : respuesta.status === 429
+          ? 'Demasiados intentos. Prueba más tarde.'
+          : 'No se pudo completar la operación.',
+      'HTTP',
+      respuesta.status
+    )
+  }
+
+  if (respuesta.status === 204) return null
+
+  return respuesta.json()
+}
+
+
+export async function descargarAdjuntoAutenticado(ruta) {
+  authService.checkExpiration()
+
+  if (!token) {
+    throw new AuthError(
+      'Debes iniciar sesión para descargar la evidencia.',
+      'EXPIRED',
+      401
+    )
+  }
+
+  if (!apiBaseUrl) {
+    throw new AuthError(
+      'La API no está configurada.',
+      'CONFIGURATION'
+    )
+  }
+
+  let respuesta
+
+  try {
+    respuesta = await fetch(`${apiBaseUrl}${ruta}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: 'omit',
+      cache: 'no-store',
+      redirect: 'error',
+    })
+  } catch {
+    throw new AuthError(
+      'No se pudo descargar el archivo.',
+      'NETWORK'
+    )
+  }
+
+  if (respuesta.status === 401) {
+    clearSession(expiredMessage)
+    throw new AuthError(expiredMessage, 'EXPIRED', 401)
+  }
+
+  if (!respuesta.ok) {
+    throw new AuthError(
+      'No se pudo abrir la evidencia.',
+      'HTTP',
+      respuesta.status
+    )
+  }
+
+  return respuesta.blob()
+}
+
+
+export async function subirAdjuntoInterno(idSolicitud, archivo) {
+  authService.checkExpiration()
+
+  if (!token) {
+    throw new AuthError(
+      'Tu sesión ha expirado. Vuelve a iniciar sesión.',
+      'EXPIRED',
+      401
+    )
+  }
+
+  if (!apiBaseUrl) {
+    throw new AuthError(
+      'La API no está configurada.',
+      'CONFIGURATION'
+    )
+  }
+
+  const formulario = new FormData()
+  formulario.append('archivo', archivo)
+
+  let respuesta
+
+  try {
+    respuesta = await fetch(
+      `${apiBaseUrl}/api/solicitudes-internas/${idSolicitud}/adjuntos`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formulario,
+        credentials: 'omit',
+        cache: 'no-store',
+        redirect: 'error',
+      }
+    )
+  } catch {
+    throw new AuthError(
+      'No fue posible subir el archivo.',
+      'NETWORK'
+    )
+  }
+
+  if (respuesta.status === 401) {
+    clearSession(expiredMessage)
+
+    throw new AuthError(expiredMessage, 'EXPIRED', 401)
+  }
+
+  if (!respuesta.ok) {
+    const mensaje = {
+      400: 'El archivo no es válido o supera el límite permitido.',
+      403: 'No tienes permisos para adjuntar evidencias.',
+      404: 'No se encontró la solicitud.',
+      409: 'La solicitud ya no permite agregar evidencias.',
+      413: 'El archivo es demasiado grande.',
+      429: 'Se alcanzó el límite de solicitudes. Inténtalo más tarde.',
+    }[respuesta.status] || 'No se pudo subir el archivo.'
+
+    throw new AuthError(
+      mensaje,
+      'HTTP',
+      respuesta.status
+    )
+  }
+
+  return respuesta.json()
+}
+
