@@ -1,0 +1,23 @@
+@UtaFlow.Api_HostAddress = https://localhost:7003
+
+// Definir token en el entorno privado del cliente HTTP; no guardarlo en este archivo.
+GET {{UtaFlow.Api_HostAddress}}/api/auth/me
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+// Sin token: debe devolver 401.
+GET {{UtaFlow.Api_HostAddress}}/api/auth/me
+Accept: application/json
+
+###
+
+// Definir correo y contrasena fuera del repositorio.
+POST {{UtaFlow.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "correo": "{{correo}}",
+  "contrasena": "{{contrasena}}"
+}
