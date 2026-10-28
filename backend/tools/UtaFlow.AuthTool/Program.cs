@@ -23,9 +23,12 @@ if (args is ["check-db"])
     }
 }
 
+if (args is ["create-test-user"] && !Console.IsInputRedirected)
+    return await CreateTestUser.RunAsync(ReadPassword);
+
 if (args is not ["hash"] || Console.IsInputRedirected)
 {
-    Console.Error.WriteLine("Uso: UtaFlow.AuthTool hash | check-db. El hash requiere una consola interactiva.");
+    Console.Error.WriteLine("Uso: UtaFlow.AuthTool hash | check-db | create-test-user. Hash y creacion requieren una consola interactiva.");
     return 1;
 }
 
