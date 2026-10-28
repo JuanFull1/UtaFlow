@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { join, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
@@ -219,13 +219,58 @@ test('rutas y sesiones en navegador, con API simulada exclusivamente en la prueb
       await until('Boolean(document.querySelector("#not-found-title"))')
       assert.equal(await evaluate('document.body.textContent.includes("Cuenta de prueba")'), false)
     })
-    await t.test('login conserva paneles y no desborda a 390 y 1440 píxeles', async () => {
+    await t.test('login valida campos y permite mostrar y ocultar la contraseña sin alterarla', async () => {
       await navigate('/login', true)
       await until('Boolean(document.querySelector("form"))')
-      for (const width of [390, 1440]) {
-        await command('Emulation.setDeviceMetricsOverride', { width, height: 1000, deviceScaleFactor: 1, mobile: false })
+      await evaluate('document.querySelector("form").requestSubmit()')
+      await until('Boolean(document.querySelector("#correo-error"))')
+      assert.equal(await evaluate('document.activeElement.id'), 'correo')
+      assert.equal(await evaluate('document.querySelector("#contrasena").getAttribute("aria-invalid")'), 'true')
+      await evaluate(`(()=>{const el=document.querySelector('#contrasena');
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,'Ejemplo exclusivo de prueba');
+        el.dispatchEvent(new Event('input',{bubbles:true}));})()`)
+      await evaluate('document.querySelector(".password-toggle").click()')
+      await until('document.querySelector("#contrasena").type==="text"')
+      assert.equal(await evaluate('document.querySelector("#contrasena").value'), 'Ejemplo exclusivo de prueba')
+      assert.equal(await evaluate('document.querySelector(".password-toggle").getAttribute("aria-pressed")'), 'true')
+      await command('Page.bringToFront')
+      await evaluate('document.querySelector(".password-toggle").focus()')
+      assert.equal(await evaluate('document.activeElement.classList.contains("password-toggle")'), true)
+      await command('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', text: '\r', windowsVirtualKeyCode: 13 })
+      await command('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 })
+      await until('document.querySelector("#contrasena").type==="password"')
+      assert.equal(await evaluate('document.querySelector("#contrasena").value'), 'Ejemplo exclusivo de prueba')
+      assert.equal(await evaluate('window.__authTest.calls.length'), 0)
+      assert.equal(await evaluate('document.querySelector("#remember-session").disabled'), true)
+      assert.equal(await evaluate('document.querySelector(".forgot-password").getAttribute("aria-disabled")'), 'true')
+    })
+    await t.test('login indica carga y bloquea envíos duplicados hasta confirmar /me', async () => {
+      await login('EXPERTO', { meDelay: 700 })
+      await until('Boolean(document.querySelector(".login-submit:disabled .spinner-border"))')
+      assert.equal(await evaluate('document.querySelector("#correo").disabled && document.querySelector("#contrasena").disabled'), true)
+      await evaluate('document.querySelector("form").requestSubmit()')
+      await until('Boolean(document.querySelector("#welcome-title"))')
+      assert.equal(await evaluate('window.__authTest.calls.length'), 2)
+    })
+    await t.test('login se adapta desde 320 hasta 1920 píxeles sin desbordar ni ocultar controles', async () => {
+      await navigate('/login', true)
+      await until('Boolean(document.querySelector("form"))')
+      for (const [width, height] of [[320, 568], [390, 844], [768, 1024], [1024, 768], [1366, 768], [1440, 900], [1920, 1080]]) {
+        await command('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false })
         assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true)
-        assert.equal(await evaluate('Boolean(document.querySelector(".login-showcase"))'), true)
+        assert.equal(await evaluate('getComputedStyle(document.querySelector(".login-showcase")).display!=="none"'), width > 760)
+        assert.equal(await evaluate(`['#correo','#contrasena','.login-submit','.forgot-password'].every(selector=>{
+          const rect=document.querySelector(selector).getBoundingClientRect();
+          return rect.width>0 && rect.left>=0 && rect.right<=innerWidth && rect.bottom<=document.documentElement.scrollHeight;
+        })`), true)
+        if (width > 760) {
+          const ratio = await evaluate('document.querySelector(".login-panel").getBoundingClientRect().width/document.querySelector(".login-card").clientWidth')
+          assert.ok(Math.abs(ratio - .42) < .01)
+        }
+        if (width === 390 || width === 1440) {
+          const screenshot = await command('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true })
+          await writeFile(join(cacheRoot, `login-${width}.png`), Buffer.from(screenshot.data, 'base64'))
+        }
       }
     })
     assert.deepEqual(consoleErrors, [], 'La aplicación no debe producir errores de consola')
