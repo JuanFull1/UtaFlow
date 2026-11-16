@@ -200,4 +200,18 @@ public interface ISolicitudesInternasRepository
     Task<(string Ruta, string Nombre, string Tipo)?> ObtenerAdjuntoAsync(
         int idSolicitud, int idAdjunto, CancellationToken ct
     );
+
+    // Ciclo posterior a la aprobación: implementación, revisión y cierre.
+    Task<Dictionary<string, object?>?> ObtenerCicloAsync(int idSolicitud, CancellationToken ct);
+    Task IniciarImplementacionAsync(int idSolicitud, int idUsuario, CancellationToken ct);
+    Task RegistrarImplementacionAsync(
+        int idSolicitud, int idUsuario, ImplementacionRequest datos, CancellationToken ct
+    );
+    Task RegistrarRevisionAsync(
+        int idSolicitud, int idUsuario, RevisionRequest datos, CancellationToken ct
+    );
+    Task CerrarCambioAsync(
+        int idSolicitud, int idUsuario, CierreRequest datos, CancellationToken ct
+    );
+    Task<IReadOnlyList<Dictionary<string, object?>>> ReporteEstadoAsync(CancellationToken ct);
 }

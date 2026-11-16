@@ -31,11 +31,20 @@ const ETAPAS = [
       ].includes(s.estadoCodigo),
   },
   {
-    id: 'decididas',
-    titulo: 'Decididas',
-    descripcion: 'Aprobadas y rechazadas',
+    id: 'aplicando',
+    titulo: 'Aprobadas · en ejecución',
+    descripcion: 'Por implementar, en implementación o en revisión',
     coincide: (s) =>
-      ['APROBADA', 'RECHAZADA'].includes(s.estadoCodigo),
+      ['APROBADA', 'EN_IMPLEMENTACION', 'EN_REVISION'].includes(
+        s.estadoCodigo
+      ),
+  },
+  {
+    id: 'cerradas',
+    titulo: 'Cerradas',
+    descripcion: 'Cambios terminados y rechazados',
+    coincide: (s) =>
+      ['CERRADA', 'RECHAZADA'].includes(s.estadoCodigo),
   },
 ]
 
@@ -46,11 +55,14 @@ function necesitaAccion(solicitud, experto) {
         solicitud.estadoCodigo
       ) ||
       (solicitud.estadoCodigo === 'EN_COMITE' &&
-        !solicitud.tieneAnalisis)
+        !solicitud.tieneAnalisis) ||
+      ['APROBADA', 'EN_IMPLEMENTACION'].includes(
+        solicitud.estadoCodigo
+      )
     )
   }
 
-  return solicitud.estadoCodigo === 'EN_COMITE'
+  return ['EN_COMITE', 'EN_REVISION'].includes(solicitud.estadoCodigo)
 }
 
 function ordenar(a, b) {
@@ -114,7 +126,7 @@ export default function TableroEtapas({
         </div>
 
         <div>
-          <span>Aprobadas o rechazadas</span>
+          <span>Cerradas o rechazadas</span>
           <strong>{resueltas}</strong>
         </div>
       </section>

@@ -45,12 +45,6 @@ const MANTENIMIENTOS = [
   },
 ]
 
-const NIVELES = [
-  { valor: '1', etiqueta: 'Bajo' },
-  { valor: '2', etiqueta: 'Medio' },
-  { valor: '3', etiqueta: 'Alto' },
-]
-
 const COMPONENTES = [
   'Frontend / interfaz web',
   'API / backend',
@@ -439,21 +433,12 @@ export default function FormularioSolicitudInterna({
 
         {/* 4. IMPACTO Y RIESGO */}
         <div className="uf-form-section">
-          <h3>4. Impacto, urgencia y riesgo</h3>
+          <h3>4. Prioridad y riesgo</h3>
 
-          <SelectorTarjetas
-            titulo="Impacto estimado"
-            opciones={NIVELES}
-            valor={datos.idImpacto}
-            onChange={(v) => seleccionar('idImpacto', v)}
-          />
-
-          <SelectorTarjetas
-            titulo="Urgencia estimada"
-            opciones={NIVELES}
-            valor={datos.urgencia}
-            onChange={(v) => seleccionar('urgencia', v)}
-          />
+          <p className="text-muted small">
+            El impacto y el costo los estima el experto en su evaluación
+            técnica.
+          </p>
 
           <label>
             Prioridad de la solicitud *
@@ -494,23 +479,6 @@ export default function FormularioSolicitudInterna({
               </label>
             ))}
           </div>
-
-          <div className="uf-form-grid">
-            <label>
-              Costo preliminar (USD)
-              <input
-                className="form-control"
-                type="number"
-                name="costoEstimadoSolicitado"
-                min="0"
-                max="9999999999.99"
-                step="0.01"
-                value={datos.costoEstimadoSolicitado}
-                onChange={onChange}
-                placeholder="0.00"
-              />
-            </label>
-          </div>
         </div>
 
         {/* 5. PLANIFICACIÓN INICIAL */}
@@ -526,28 +494,14 @@ export default function FormularioSolicitudInterna({
           />
 
           {experto && (
-            <>
-              <label>
-                Rama GitFlow sugerida
-                <input
-                  className="form-control"
-                  name="ramaSugerida"
-                  maxLength={150}
-                  value={datos.ramaSugerida}
-                  onChange={onChange}
-                  placeholder="feature/actualizar-autenticacion"
-                />
-              </label>
-
-              <Campo
-                titulo="Archivos previstos (una ruta por línea)"
-                nombre="archivosSugeridos"
-                valor={datos.archivosSugeridos}
-                onChange={onChange}
-                maxLength={1000}
-                filas={4}
-              />
-            </>
+            <Campo
+              titulo="Archivos previstos (una ruta por línea)"
+              nombre="archivosSugeridos"
+              valor={datos.archivosSugeridos}
+              onChange={onChange}
+              maxLength={1000}
+              filas={4}
+            />
           )}
 
           <div className="uf-form-grid">
@@ -562,15 +516,6 @@ export default function FormularioSolicitudInterna({
               />
             </label>
           </div>
-
-          <Campo
-            titulo="Comentarios adicionales"
-            nombre="comentariosAdicionales"
-            valor={datos.comentariosAdicionales}
-            onChange={onChange}
-            maxLength={1000}
-            filas={2}
-          />
         </div>
 
         {/* 6. EVIDENCIAS */}

@@ -13,6 +13,8 @@ import FormularioEvaluacion from '../../components/solicitudes/FormularioEvaluac
 import FormularioSolicitudInterna from '../../components/solicitudes/FormularioSolicitudInterna.jsx'
 import PanelLateralSolicitud from '../../components/solicitudes/PanelLateralSolicitud.jsx'
 import DecisionColectiva from '../../components/solicitudes/DecisionColectiva.jsx'
+import CicloCambio from '../../components/solicitudes/CicloCambio.jsx'
+import ReporteEstado from '../../components/solicitudes/ReporteEstado.jsx'
 import ResumenSolicitudAmpliada from '../../components/solicitudes/ResumenSolicitudAmpliada.jsx'
 
 import './PanelSolicitudes.css'
@@ -150,12 +152,22 @@ function requiereExperto(codigo) {
   ].includes(codigo)
 }
 
+// Etapas posteriores a la aprobación.
+function expertoCiclo(s) {
+  return ['APROBADA', 'EN_IMPLEMENTACION'].includes(s.estadoCodigo)
+}
+
+function comiteCiclo(s) {
+  return s.estadoCodigo === 'EN_REVISION'
+}
+
 // Qué solicitudes esperan realmente al experto:
 // las devueltas y las que aún no tienen su análisis.
 function expertoPendiente(s) {
   return (
     ['ENVIADA', 'PENDIENTE_EXPERTO'].includes(s.estadoCodigo) ||
-    (s.estadoCodigo === 'EN_COMITE' && !s.tieneAnalisis)
+    (s.estadoCodigo === 'EN_COMITE' && !s.tieneAnalisis) ||
+    expertoCiclo(s)
   )
 }
 
@@ -925,11 +937,11 @@ export default function Authenticated() {
   const pendientes = solicitudes.filter((s) =>
     experto
       ? expertoPendiente(s)
-      : requiereComite(s.estadoCodigo)
+      : requiereComite(s.estadoCodigo) || comiteCiclo(s)
   ).length
 
   const resueltas = solicitudes.filter((s) =>
-    estadoFinal(s.estadoCodigo)
+    ['CERRADA', 'RECHAZADA'].includes(s.estadoCodigo)
   ).length
 
   const solicitudesFiltradas = solicitudes.filter((s) => {
@@ -938,13 +950,13 @@ export default function Authenticated() {
     }
 
     if (filtroLista === 'decididas') {
-      return estadoFinal(s.estadoCodigo)
+      return estadoFinal(s.estadoCodigo) || s.estadoCodigo === 'CERRADA'
     }
 
     if (filtroLista === 'pendientes') {
       return experto
         ? expertoPendiente(s)
-        : requiereComite(s.estadoCodigo)
+        : requiereComite(s.estadoCodigo) || comiteCiclo(s)
     }
 
     return true
@@ -1012,6 +1024,16 @@ export default function Authenticated() {
               ? 'Nueva solicitud técnica'
               : 'Proponer un cambio'}
           </button>
+
+          <button
+            type="button"
+            className={
+              vista === 'reporte' ? 'activo' : ''
+            }
+            onClick={() => setVista('reporte')}
+          >
+            Reporte de estado
+          </button>
         </nav>
 
         <div className="uf-sidebar-footer">
@@ -1067,6 +1089,8 @@ export default function Authenticated() {
                   ? 'Evaluación de la solicitud'
                   : 'Revisión del comité'
               )}
+
+              {vista === 'reporte' && 'Reporte de estado'}
             </h1>
           </div>
 
@@ -1105,6 +1129,8 @@ export default function Authenticated() {
         {cargando && (
           <p>Cargando solicitudes…</p>
         )}
+
+        {vista === 'reporte' && <ReporteEstado />}
 
         {/* ==========================================
             TABLERO VISUAL
@@ -1702,6 +1728,15 @@ export default function Authenticated() {
               {/* ======================================
                   COMITE: DECISION COLECTIVA
               ====================================== */}
+
+              <CicloCambio
+                solicitud={detalle.solicitud}
+                versionPrevista={detalle.decisionComite?.versionPrevista}
+                experto={experto}
+                comite={comite}
+                ocupado={ocupado}
+                ejecutar={ejecutar}
+              />
 
               {comite && (
                 <DecisionColectiva
