@@ -12,3 +12,4 @@ _backend_node_respaldo/
 *.suo
 *.sqlite
 *.db
+backend/UtaFlow.Api/uploads_privados/
