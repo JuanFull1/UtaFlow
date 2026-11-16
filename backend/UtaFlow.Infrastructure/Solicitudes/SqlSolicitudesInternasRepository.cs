@@ -549,7 +549,7 @@ public sealed partial class SqlSolicitudesInternasRepository(
 
         if (actual is null ||
             actual.Value.Estado is not (
-                "ENVIADA" or "PENDIENTE_EXPERTO"
+                "ENVIADA" or "PENDIENTE_EXPERTO" or "EN_COMITE"
             ))
         {
             await transaccion.RollbackAsync(ct);
@@ -900,7 +900,7 @@ public sealed partial class SqlSolicitudesInternasRepository(
                 destino == "CLIENTE" &&
                 actual.Value.Origen == "PUBLICO" &&
                 actual.Value.Estado is (
-                    "ENVIADA" or "PENDIENTE_EXPERTO"
+                    "ENVIADA" or "PENDIENTE_EXPERTO" or "EN_COMITE"
                 )
             ) ||
             (

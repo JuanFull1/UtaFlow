@@ -66,13 +66,11 @@ const NUEVA_INICIAL = {
   fechaLimite: '',
   tipoMantenimiento: '',
   componentesAfectados: '',
-  componentesAsociados: '',
   estadoDeseado: '',
   consecuenciaNoHacer: '',
   idImpacto: '',
   urgencia: '',
   riesgosIniciales: '',
-  usuariosAfectados: '',
   costoEstimadoSolicitado: '',
   dependenciasPrevias: '',
   archivosSugeridos: '',
@@ -142,11 +140,23 @@ function estadoFinal(codigo) {
   return ['APROBADA', 'RECHAZADA'].includes(codigo)
 }
 
+// El experto puede registrar su análisis mientras la solicitud
+// está en el comité (apoyo opcional) o si se la devolvieron.
 function requiereExperto(codigo) {
   return [
     'ENVIADA',
     'PENDIENTE_EXPERTO',
+    'EN_COMITE',
   ].includes(codigo)
+}
+
+// Qué solicitudes esperan realmente al experto:
+// las devueltas y las que aún no tienen su análisis.
+function expertoPendiente(s) {
+  return (
+    ['ENVIADA', 'PENDIENTE_EXPERTO'].includes(s.estadoCodigo) ||
+    (s.estadoCodigo === 'EN_COMITE' && !s.tieneAnalisis)
+  )
 }
 
 function requiereComite(codigo) {
@@ -508,13 +518,11 @@ export default function Authenticated() {
         fechaLimite: nueva.fechaLimite || null,
         tipoMantenimiento: nueva.tipoMantenimiento,
         componentesAfectados: nueva.componentesAfectados || null,
-        componentesAsociados: nueva.componentesAsociados.trim() || null,
         estadoDeseado: nueva.estadoDeseado.trim() || null,
         consecuenciaNoHacer: nueva.consecuenciaNoHacer.trim() || null,
         idImpacto: nueva.idImpacto ? Number(nueva.idImpacto) : null,
         urgencia: nueva.urgencia ? Number(nueva.urgencia) : null,
         riesgosIniciales: nueva.riesgosIniciales || null,
-        usuariosAfectados: nueva.usuariosAfectados.trim() || null,
         costoEstimadoSolicitado:
           nueva.costoEstimadoSolicitado === ''
             ? null
@@ -916,7 +924,7 @@ export default function Authenticated() {
 
   const pendientes = solicitudes.filter((s) =>
     experto
-      ? requiereExperto(s.estadoCodigo)
+      ? expertoPendiente(s)
       : requiereComite(s.estadoCodigo)
   ).length
 
@@ -935,7 +943,7 @@ export default function Authenticated() {
 
     if (filtroLista === 'pendientes') {
       return experto
-        ? requiereExperto(s.estadoCodigo)
+        ? expertoPendiente(s)
         : requiereComite(s.estadoCodigo)
     }
 
@@ -1353,7 +1361,7 @@ export default function Authenticated() {
 
                 <div className="uf-facts">
                   <div>
-                    <b>Empresa o área</b>
+                    <b>Cooperativa</b>
                     <span>
                       {valor(solicitud.empresaArea)}
                     </span>
@@ -1417,7 +1425,9 @@ export default function Authenticated() {
                 />
 
                 {Number(usuario.id) === Number(solicitud.idSolicitante) &&
-                  solicitud.estadoCodigo === 'ENVIADA' && (
+                  ['ENVIADA', 'EN_COMITE'].includes(
+                    solicitud.estadoCodigo
+                  ) && (
                   <div className="mt-3">
                     <label className="form-label fw-semibold">
                       Agregar nuevas evidencias
@@ -1453,6 +1463,7 @@ export default function Authenticated() {
                     detalle.analisis?.recomendacion
                   )}
                   editado={analisisEditado}
+                  yaEnComite={estado === 'EN_COMITE'}
                 />
               )}
 

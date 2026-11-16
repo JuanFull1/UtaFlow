@@ -42,7 +42,7 @@ public sealed partial class SqlSolicitudesInternasRepository
             WHERE s.IdSolicitud = @Solicitud
               AND s.IdSolicitante = @Usuario
               AND s.Origen IN ('EXPERTO', 'COMITE')
-              AND e.Codigo = 'ENVIADA';
+              AND e.Codigo IN ('ENVIADA', 'EN_COMITE');
             """,
             conexion
         );

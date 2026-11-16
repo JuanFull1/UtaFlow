@@ -174,7 +174,7 @@ export default function Login() {
                     name="correo"
                     type="email"
                     className="form-control"
-                    placeholder="usuario@empresa.com"
+                    placeholder="usuario@cooperativa.com"
                     autoComplete="username"
                     autoCapitalize="none"
                     spellCheck={false}

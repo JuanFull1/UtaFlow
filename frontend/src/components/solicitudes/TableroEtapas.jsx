@@ -5,23 +5,19 @@ import './TableroEtapas.css'
 const ETAPAS = [
   {
     id: 'registradas',
-    titulo: 'Registradas',
-    descripcion: 'Esperan revisión del experto',
+    titulo: 'En comité · nuevas',
+    descripcion: 'Llegaron directo al comité, sin análisis técnico',
     coincide: (s) =>
-      s.estadoCodigo === 'ENVIADA' && !s.tieneAnalisis,
-  },
-  {
-    id: 'analisis',
-    titulo: 'En análisis',
-    descripcion: 'Con evaluación técnica guardada',
-    coincide: (s) =>
-      s.estadoCodigo === 'ENVIADA' && s.tieneAnalisis,
+      ['ENVIADA', 'EN_COMITE'].includes(s.estadoCodigo) &&
+      !s.tieneAnalisis,
   },
   {
     id: 'comite',
-    titulo: 'En comité',
-    descripcion: 'Esperan una decisión',
-    coincide: (s) => s.estadoCodigo === 'EN_COMITE',
+    titulo: 'En comité · con análisis',
+    descripcion: 'El experto ya aportó su análisis',
+    coincide: (s) =>
+      ['ENVIADA', 'EN_COMITE'].includes(s.estadoCodigo) &&
+      s.tieneAnalisis,
   },
   {
     id: 'devueltas',
@@ -45,10 +41,13 @@ const ETAPAS = [
 
 function necesitaAccion(solicitud, experto) {
   if (experto) {
-    return [
-      'ENVIADA',
-      'PENDIENTE_EXPERTO',
-    ].includes(solicitud.estadoCodigo)
+    return (
+      ['ENVIADA', 'PENDIENTE_EXPERTO'].includes(
+        solicitud.estadoCodigo
+      ) ||
+      (solicitud.estadoCodigo === 'EN_COMITE' &&
+        !solicitud.tieneAnalisis)
+    )
   }
 
   return solicitud.estadoCodigo === 'EN_COMITE'

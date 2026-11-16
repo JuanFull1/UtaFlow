@@ -97,7 +97,7 @@
 
 .uf-board-columns {
   display: grid;
-  grid-template-columns: repeat(5, minmax(235px, 1fr));
+  grid-template-columns: repeat(4, minmax(235px, 1fr));
   gap: 12px;
   min-width: 1230px;
   align-items: stretch;

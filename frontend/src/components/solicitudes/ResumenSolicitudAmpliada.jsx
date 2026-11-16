@@ -45,11 +45,6 @@ export default function ResumenSolicitudAmpliada({ solicitud }) {
         />
 
         <Campo
-          nombre="Componentes asociados"
-          dato={solicitud.componentesAsociados}
-        />
-
-        <Campo
           nombre="Estado deseado"
           dato={solicitud.estadoDeseado}
         />
@@ -67,11 +62,6 @@ export default function ResumenSolicitudAmpliada({ solicitud }) {
         <Campo
           nombre="Urgencia solicitada"
           dato={impacto[solicitud.urgencia]}
-        />
-
-        <Campo
-          nombre="Usuarios o áreas afectadas"
-          dato={solicitud.usuariosAfectados}
         />
 
         <Campo
