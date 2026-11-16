@@ -1386,26 +1386,26 @@ export default function Authenticated() {
                 </p>
 
                 <div className="uf-facts">
-                  <div>
-                    <b>Cooperativa</b>
-                    <span>
-                      {valor(solicitud.empresaArea)}
-                    </span>
-                  </div>
+                  {solicitud.empresaArea && (
+                    <div>
+                      <b>Cooperativa</b>
+                      <span>{solicitud.empresaArea}</span>
+                    </div>
+                  )}
 
-                  <div>
-                    <b>Módulo afectado</b>
-                    <span>
-                      {valor(solicitud.moduloAfectado)}
-                    </span>
-                  </div>
+                  {solicitud.moduloAfectado && (
+                    <div>
+                      <b>Módulo afectado</b>
+                      <span>{solicitud.moduloAfectado}</span>
+                    </div>
+                  )}
 
-                  <div>
-                    <b>Versión del software</b>
-                    <span>
-                      {valor(solicitud.versionSoftware)}
-                    </span>
-                  </div>
+                  {solicitud.versionSoftware && (
+                    <div>
+                      <b>Versión del software</b>
+                      <span>{solicitud.versionSoftware}</span>
+                    </div>
+                  )}
 
                   <div>
                     <b>Tipo ITIL</b>
@@ -1428,6 +1428,16 @@ export default function Authenticated() {
 
                     <p className="uf-pre">
                       {solicitud.afectacionActual}
+                    </p>
+                  </>
+                )}
+
+                {solicitud.estadoDeseado && (
+                  <>
+                    <h3>Cómo se espera que quede</h3>
+
+                    <p className="uf-pre">
+                      {solicitud.estadoDeseado}
                     </p>
                   </>
                 )}
