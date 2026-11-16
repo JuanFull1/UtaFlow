@@ -57,6 +57,8 @@ export default function CicloCambio({
   })
   const [rev, setRev] = useState(REV_INICIAL)
   const [cierre, setCierre] = useState(CIERRE_INICIAL)
+  const [github, setGithub] = useState(null)
+  const [consultando, setConsultando] = useState(false)
 
   useEffect(() => {
     let activo = true
@@ -75,11 +77,29 @@ export default function CicloCambio({
     }
   }, [id, estado])
 
-  if (
-    !['APROBADA', 'EN_IMPLEMENTACION', 'EN_REVISION', 'CERRADA'].includes(
-      estado
-    )
-  ) {
+  const enCiclo = [
+    'APROBADA',
+    'EN_IMPLEMENTACION',
+    'EN_REVISION',
+    'CERRADA',
+  ].includes(estado)
+
+  async function consultarGitHub() {
+    setConsultando(true)
+
+    try {
+      setGithub(await api.actividadGitHub(id))
+    } catch {
+      setGithub({
+        actividad: [],
+        aviso: 'No se pudo consultar GitHub.',
+      })
+    } finally {
+      setConsultando(false)
+    }
+  }
+
+  if (!enCiclo) {
     return null
   }
 
@@ -396,6 +416,68 @@ export default function CicloCambio({
           )}
         </>
       )}
+
+      {/* ---------- Actividad en GitHub */}
+      <div className="uf-ciclo-bloque">
+        <h3>Actividad en GitHub</h3>
+
+        <p className="text-muted small">
+          Escribe el identificador{' '}
+          <code>{solicitud.identificadorBase}</code> en el título del Pull
+          Request o en el mensaje del commit, y aparecerá aquí. (No uses el
+          código de seguimiento del cliente: es privado.)
+        </p>
+
+        <button
+          type="button"
+          className="btn btn-outline-secondary btn-sm"
+          disabled={consultando}
+          onClick={consultarGitHub}
+        >
+          {consultando ? 'Consultando…' : 'Buscar en GitHub'}
+        </button>
+
+        {github?.aviso && (
+          <p className="uf-hint">{github.aviso}</p>
+        )}
+
+        {github && !github.aviso && !github.actividad?.length && (
+          <p className="uf-hint">
+            Todavía no hay Pull Requests ni commits con este código en{' '}
+            {github.repositorio}.
+          </p>
+        )}
+
+        {github?.actividad?.length > 0 && (
+          <ul className="uf-ciclo-auditoria">
+            {github.actividad.map((a) => (
+              <li key={a.url}>
+                <b>{a.tipo}</b>
+                {a.estado ? ` (${a.estado})` : ''} ·{' '}
+                <a href={a.url} target="_blank" rel="noopener noreferrer">
+                  {a.titulo}
+                </a>
+                {a.autor ? ` · ${a.autor}` : ''}
+
+                {estado === 'EN_IMPLEMENTACION' && experto && (
+                  <button
+                    type="button"
+                    className="btn btn-link btn-sm"
+                    onClick={() =>
+                      setImpl((anterior) => ({
+                        ...anterior,
+                        enlaceGit: a.url,
+                      }))
+                    }
+                  >
+                    Usar como enlace
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {/* ---------- Cerrada: resumen de solo lectura */}
       {estado === 'CERRADA' && (

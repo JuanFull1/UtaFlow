@@ -166,6 +166,26 @@ public sealed partial class SqlSolicitudesInternasRepository
         await comando.ExecuteNonQueryAsync(ct);
     }
 
+    public async Task<string?> ObtenerIdentificadorBaseAsync(
+        int idSolicitud,
+        CancellationToken ct
+    )
+    {
+        await using var conexion = Conexion();
+        await conexion.OpenAsync(ct);
+
+        await using var comando = new SqlCommand(
+            "SELECT Base FROM dbo.vw_IdentificadorCambio WHERE IdSolicitud = @Id;",
+            conexion
+        );
+
+        Parametro(comando, "@Id", SqlDbType.Int, idSolicitud);
+
+        var valor = await comando.ExecuteScalarAsync(ct);
+
+        return valor is null or DBNull ? null : Convert.ToString(valor);
+    }
+
     public async Task<IReadOnlyList<Dictionary<string, object?>>> ReporteEstadoAsync(
         CancellationToken ct
     )

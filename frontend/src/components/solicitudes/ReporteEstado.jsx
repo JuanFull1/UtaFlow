@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { solicitudesInternasService as api } from '../../services/solicitudesInternasService.js'
 
 const COLUMNAS = [
-  ['codigo', 'Código'],
+  ['identificador', 'Identificador'],
   ['asunto', '¿Qué cambio?'],
   ['sistema', 'Sistema'],
   ['modulo', 'Módulo'],

@@ -1253,7 +1253,7 @@ export default function Authenticated() {
                         <strong>{s.asunto}</strong>
 
                         <small className="d-block text-muted">
-                          {s.codigo}
+                          {s.identificador || s.codigo}
                         </small>
                       </td>
 
@@ -1347,7 +1347,7 @@ export default function Authenticated() {
 
                 <div className="uf-detail-heading">
                   <div>
-                    <small>{solicitud.codigo}</small>
+                    <small>{solicitud.identificador || solicitud.codigo}</small>
 
                     <h2>{solicitud.asunto}</h2>
 

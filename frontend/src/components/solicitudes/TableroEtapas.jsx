@@ -98,6 +98,7 @@ export default function TableroEtapas({
         if (!texto) return true
 
         return [
+          s.identificador,
           s.codigo,
           s.asunto,
           s.solicitante,
@@ -213,7 +214,7 @@ export default function TableroEtapas({
                       onClick={() => onAbrir(s.id)}
                     >
                       <span className="uf-board-item-head">
-                        <strong>{s.codigo}</strong>
+                        <strong>{s.identificador || s.codigo}</strong>
                         <small>{s.origen}</small>
                       </span>
 

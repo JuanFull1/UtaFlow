@@ -90,7 +90,7 @@ export default function TablaIssues({ solicitudes = [], onAbrir }) {
       .filter(
         (s) =>
           !t ||
-          [s.codigo, s.asunto, s.solicitante, s.sistema, s.modulo]
+          [s.identificador, s.codigo, s.asunto, s.solicitante, s.sistema, s.modulo]
             .some((v) => String(v || '').toLowerCase().includes(t))
       )
   }, [solicitudes, abiertas, texto, filtro])
@@ -187,7 +187,7 @@ export default function TablaIssues({ solicitudes = [], onAbrir }) {
                 </div>
 
                 <small>
-                  {s.codigo} · abierto el {fecha(s.fechaEnvio)} por{' '}
+                  {s.identificador || s.codigo} · abierto el {fecha(s.fechaEnvio)} por{' '}
                   {s.solicitante || 'Solicitante'}
                 </small>
               </div>

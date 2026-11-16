@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 
 using UtaFlow.Api.Authentication;
 using UtaFlow.Api.Controllers;
+using UtaFlow.Api.Integrations;
 using UtaFlow.Application.Authentication;
 using UtaFlow.Application.Administracion;
 using UtaFlow.Application.Solicitudes;
@@ -130,6 +131,8 @@ public static class ApiBootstrap
         >(_ => new SqlSolicitudesInternasRepository(
             cadenaConexion
         ));
+
+        builder.Services.AddHttpClient<GitHubActividadService>();
 
         // =====================================================
         // 6. CONTROLADORES Y ERRORES

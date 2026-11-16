@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using UtaFlow.Api.Integrations;
 using UtaFlow.Application.Solicitudes;
 
 namespace UtaFlow.Api.Controllers;
@@ -12,7 +13,8 @@ namespace UtaFlow.Api.Controllers;
 [Authorize(Roles = "EXPERTO,COMITE")]
 [Route("api/solicitudes-internas")]
 public sealed class CicloCambioController(
-    ISolicitudesInternasRepository repositorio
+    ISolicitudesInternasRepository repositorio,
+    GitHubActividadService github
 ) : ControllerBase
 {
     private int IdUsuario()
@@ -57,6 +59,21 @@ public sealed class CicloCambioController(
         var ciclo = await repositorio.ObtenerCicloAsync(id, ct);
 
         return ciclo is null ? NoContent() : Ok(ciclo);
+    }
+
+    // GET /api/solicitudes-internas/{id}/github
+    // Pull Requests y commits de GitHub que mencionan el identificador del
+    // cambio. Nunca se usa el código de seguimiento privado.
+    [HttpGet("{id:int}/github")]
+    public async Task<IActionResult> ActividadGitHub(int id, CancellationToken ct)
+    {
+        if (id <= 0) return BadRequest();
+
+        var identificador = await repositorio.ObtenerIdentificadorBaseAsync(id, ct);
+
+        if (identificador is null) return NotFound();
+
+        return Ok(await github.BuscarAsync(identificador, ct));
     }
 
     // POST /api/solicitudes-internas/{id}/ciclo/iniciar

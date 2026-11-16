@@ -58,6 +58,10 @@ export const solicitudesInternasService = {
     return apiAutenticada(`${BASE}/${id}/ciclo`)
   },
 
+  actividadGitHub(id) {
+    return apiAutenticada(`${BASE}/${id}/github`)
+  },
+
   iniciarImplementacion(id) {
     return apiAutenticada(`${BASE}/${id}/ciclo/iniciar`, {
       method: 'POST',

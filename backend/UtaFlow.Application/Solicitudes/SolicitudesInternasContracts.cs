@@ -214,4 +214,5 @@ public interface ISolicitudesInternasRepository
         int idSolicitud, int idUsuario, CierreRequest datos, CancellationToken ct
     );
     Task<IReadOnlyList<Dictionary<string, object?>>> ReporteEstadoAsync(CancellationToken ct);
+    Task<string?> ObtenerIdentificadorBaseAsync(int idSolicitud, CancellationToken ct);
 }
