@@ -1,0 +1,122 @@
+.uf-issues-barra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.uf-issues-barra .form-control {
+  flex: 1 1 280px;
+}
+
+.uf-issues-caja {
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.uf-issues-tabs {
+  display: flex;
+  gap: 18px;
+  padding: 12px 16px;
+  background: #f6f8fa;
+  border-bottom: 1px solid #d0d7de;
+}
+
+.uf-issues-tabs button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-weight: 600;
+  color: #57606a;
+}
+
+.uf-issues-tabs button.activo {
+  color: #1f2328;
+}
+
+.uf-issues-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.uf-issues-lista li {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e9ee;
+}
+
+.uf-issues-lista li:last-child {
+  border-bottom: 0;
+}
+
+.uf-issues-lista li:hover {
+  background: #f9fafb;
+}
+
+.uf-issue-icono {
+  flex: none;
+  width: 20px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.uf-issue-icono.abierta { color: #1a7f37; }
+.uf-issue-icono.cerrada { color: #8250df; }
+.uf-issue-icono.rechazada { color: #cf222e; }
+
+.uf-issue-cuerpo {
+  min-width: 0;
+}
+
+.uf-issue-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.uf-issue-enlace {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-weight: 600;
+  font-size: 16px;
+  color: #1f2328;
+  text-align: left;
+}
+
+.uf-issue-enlace:hover {
+  color: #0969da;
+  text-decoration: underline;
+}
+
+.uf-issue-cuerpo small {
+  color: #57606a;
+}
+
+.uf-etiqueta {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 1px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.uf-etiqueta.verde { background: #dafbe1; color: #116329; border-color: #aceebb; }
+.uf-etiqueta.amarillo { background: #fff8c5; color: #7d4e00; border-color: #eac54f; }
+.uf-etiqueta.naranja { background: #ffe9d6; color: #953800; border-color: #ffb77c; }
+.uf-etiqueta.rojo { background: #ffebe9; color: #a40e26; border-color: #ff8182; }
+.uf-etiqueta.azul { background: #ddf4ff; color: #0550ae; border-color: #80ccff; }
+.uf-etiqueta.morado { background: #fbefff; color: #6639ba; border-color: #d8b9ff; }
+.uf-etiqueta.turquesa { background: #d2f4ee; color: #0a5d52; border-color: #7ddccc; }
+.uf-etiqueta.rosa { background: #ffeff7; color: #99286b; border-color: #ffadd7; }
+.uf-etiqueta.gris { background: #eaeef2; color: #424a53; border-color: #d0d7de; }
+
+.uf-issues-vacio {
+  color: #57606a;
+  justify-content: center;
+}

@@ -101,6 +101,7 @@ public sealed partial class SqlSolicitudesInternasRepository(
                 e.Codigo AS estadoCodigo,
                 e.Nombre AS estado,
                 sis.Nombre AS sistema,
+                s.ModuloAfectado AS modulo,
                 p.Nombre AS prioridad,
                 tc.Codigo AS tipoCambio,
                 CAST(

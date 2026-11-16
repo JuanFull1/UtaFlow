@@ -15,6 +15,7 @@ import PanelLateralSolicitud from '../../components/solicitudes/PanelLateralSoli
 import DecisionColectiva from '../../components/solicitudes/DecisionColectiva.jsx'
 import CicloCambio from '../../components/solicitudes/CicloCambio.jsx'
 import ReporteEstado from '../../components/solicitudes/ReporteEstado.jsx'
+import TablaIssues from '../../components/solicitudes/TablaIssues.jsx'
 import ResumenSolicitudAmpliada from '../../components/solicitudes/ResumenSolicitudAmpliada.jsx'
 
 import './PanelSolicitudes.css'
@@ -1028,6 +1029,16 @@ export default function Authenticated() {
           <button
             type="button"
             className={
+              vista === 'issues' ? 'activo' : ''
+            }
+            onClick={() => setVista('issues')}
+          >
+            Cambios (issues)
+          </button>
+
+          <button
+            type="button"
+            className={
               vista === 'reporte' ? 'activo' : ''
             }
             onClick={() => setVista('reporte')}
@@ -1090,6 +1101,8 @@ export default function Authenticated() {
                   : 'Revisión del comité'
               )}
 
+              {vista === 'issues' && 'Cambios'}
+
               {vista === 'reporte' && 'Reporte de estado'}
             </h1>
           </div>
@@ -1131,6 +1144,13 @@ export default function Authenticated() {
         )}
 
         {vista === 'reporte' && <ReporteEstado />}
+
+        {!cargando && vista === 'issues' && (
+          <TablaIssues
+            solicitudes={solicitudes}
+            onAbrir={abrirSolicitud}
+          />
+        )}
 
         {/* ==========================================
             TABLERO VISUAL
