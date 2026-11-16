@@ -5,23 +5,19 @@ import './TableroEtapas.css'
 const ETAPAS = [
   {
     id: 'registradas',
-    titulo: 'Registradas',
-    descripcion: 'Esperan revisión del experto',
+    titulo: 'En comité · nuevas',
+    descripcion: 'Llegaron directo al comité, sin análisis técnico',
     coincide: (s) =>
-      s.estadoCodigo === 'ENVIADA' && !s.tieneAnalisis,
-  },
-  {
-    id: 'analisis',
-    titulo: 'En análisis',
-    descripcion: 'Con evaluación técnica guardada',
-    coincide: (s) =>
-      s.estadoCodigo === 'ENVIADA' && s.tieneAnalisis,
+      ['ENVIADA', 'EN_COMITE'].includes(s.estadoCodigo) &&
+      !s.tieneAnalisis,
   },
   {
     id: 'comite',
-    titulo: 'En comité',
-    descripcion: 'Esperan una decisión',
-    coincide: (s) => s.estadoCodigo === 'EN_COMITE',
+    titulo: 'En comité · con análisis',
+    descripcion: 'El experto ya aportó su análisis',
+    coincide: (s) =>
+      ['ENVIADA', 'EN_COMITE'].includes(s.estadoCodigo) &&
+      s.tieneAnalisis,
   },
   {
     id: 'devueltas',
@@ -35,23 +31,38 @@ const ETAPAS = [
       ].includes(s.estadoCodigo),
   },
   {
-    id: 'decididas',
-    titulo: 'Decididas',
-    descripcion: 'Aprobadas y rechazadas',
+    id: 'aplicando',
+    titulo: 'Aprobadas · en ejecución',
+    descripcion: 'Por implementar, en implementación o en revisión',
     coincide: (s) =>
-      ['APROBADA', 'RECHAZADA'].includes(s.estadoCodigo),
+      ['APROBADA', 'EN_IMPLEMENTACION', 'EN_REVISION'].includes(
+        s.estadoCodigo
+      ),
+  },
+  {
+    id: 'cerradas',
+    titulo: 'Cerradas',
+    descripcion: 'Cambios terminados y rechazados',
+    coincide: (s) =>
+      ['CERRADA', 'RECHAZADA'].includes(s.estadoCodigo),
   },
 ]
 
 function necesitaAccion(solicitud, experto) {
   if (experto) {
-    return [
-      'ENVIADA',
-      'PENDIENTE_EXPERTO',
-    ].includes(solicitud.estadoCodigo)
+    return (
+      ['ENVIADA', 'PENDIENTE_EXPERTO'].includes(
+        solicitud.estadoCodigo
+      ) ||
+      (solicitud.estadoCodigo === 'EN_COMITE' &&
+        !solicitud.tieneAnalisis) ||
+      ['APROBADA', 'EN_IMPLEMENTACION'].includes(
+        solicitud.estadoCodigo
+      )
+    )
   }
 
-  return solicitud.estadoCodigo === 'EN_COMITE'
+  return ['EN_COMITE', 'EN_REVISION'].includes(solicitud.estadoCodigo)
 }
 
 function ordenar(a, b) {
@@ -87,6 +98,7 @@ export default function TableroEtapas({
         if (!texto) return true
 
         return [
+          s.identificador,
           s.codigo,
           s.asunto,
           s.solicitante,
@@ -115,7 +127,7 @@ export default function TableroEtapas({
         </div>
 
         <div>
-          <span>Aprobadas o rechazadas</span>
+          <span>Cerradas o rechazadas</span>
           <strong>{resueltas}</strong>
         </div>
       </section>
@@ -202,7 +214,7 @@ export default function TableroEtapas({
                       onClick={() => onAbrir(s.id)}
                     >
                       <span className="uf-board-item-head">
-                        <strong>{s.codigo}</strong>
+                        <strong>{s.identificador || s.codigo}</strong>
                         <small>{s.origen}</small>
                       </span>
 

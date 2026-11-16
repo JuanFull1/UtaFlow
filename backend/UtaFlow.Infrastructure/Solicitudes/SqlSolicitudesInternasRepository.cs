@@ -95,12 +95,14 @@ public sealed partial class SqlSolicitudesInternasRepository(
             SELECT
                 s.IdSolicitud AS id,
                 s.CodigoSeguimiento AS codigo,
+                i.Identificador AS identificador,
                 s.Asunto AS asunto,
                 COALESCE(u.Nombre, s.SolicitanteNombre) AS solicitante,
                 s.Origen AS origen,
                 e.Codigo AS estadoCodigo,
                 e.Nombre AS estado,
                 sis.Nombre AS sistema,
+                s.ModuloAfectado AS modulo,
                 p.Nombre AS prioridad,
                 tc.Codigo AS tipoCambio,
                 CAST(
@@ -121,6 +123,8 @@ public sealed partial class SqlSolicitudesInternasRepository(
                 ON sis.IdSistema = s.IdSistema
             INNER JOIN dbo.TipoCambio tc
                 ON tc.IdTipoCambio = s.IdTipoCambio
+            INNER JOIN dbo.vw_IdentificadorCambio i
+                ON i.IdSolicitud = s.IdSolicitud
             LEFT JOIN dbo.Usuario u
                 ON u.IdUsuario = s.IdSolicitante
             ORDER BY
@@ -153,6 +157,8 @@ public sealed partial class SqlSolicitudesInternasRepository(
             SELECT
                 s.IdSolicitud AS id,
                 s.CodigoSeguimiento AS codigo,
+                i.Identificador AS identificador,
+                i.Base AS identificadorBase,
                 s.Asunto AS asunto,
                 s.Descripcion AS descripcion,
                 s.Razon AS razon,
@@ -195,6 +201,8 @@ public sealed partial class SqlSolicitudesInternasRepository(
                 ON p.IdPrioridad = s.IdPrioridad
             INNER JOIN dbo.TipoCambio tc
                 ON tc.IdTipoCambio = s.IdTipoCambio
+            INNER JOIN dbo.vw_IdentificadorCambio i
+                ON i.IdSolicitud = s.IdSolicitud
             LEFT JOIN dbo.Usuario u
                 ON u.IdUsuario = s.IdSolicitante
             WHERE s.IdSolicitud = @Id;
@@ -549,7 +557,7 @@ public sealed partial class SqlSolicitudesInternasRepository(
 
         if (actual is null ||
             actual.Value.Estado is not (
-                "ENVIADA" or "PENDIENTE_EXPERTO"
+                "ENVIADA" or "PENDIENTE_EXPERTO" or "EN_COMITE"
             ))
         {
             await transaccion.RollbackAsync(ct);
@@ -900,7 +908,7 @@ public sealed partial class SqlSolicitudesInternasRepository(
                 destino == "CLIENTE" &&
                 actual.Value.Origen == "PUBLICO" &&
                 actual.Value.Estado is (
-                    "ENVIADA" or "PENDIENTE_EXPERTO"
+                    "ENVIADA" or "PENDIENTE_EXPERTO" or "EN_COMITE"
                 )
             ) ||
             (

@@ -174,7 +174,7 @@ export default function Login() {
                     name="correo"
                     type="email"
                     className="form-control"
-                    placeholder="usuario@empresa.com"
+                    placeholder="usuario@cooperativa.com"
                     autoComplete="username"
                     autoCapitalize="none"
                     spellCheck={false}
@@ -286,38 +286,6 @@ export default function Login() {
                 )}
               </div>
 
-              {/* Recordarme */}
-              <div
-                className="remember-session form-check"
-                title="No disponible. La sesión permanece en memoria y se pierde al recargar la página."
-              >
-                <input
-                  id="remember-session"
-                  className="form-check-input"
-                  type="checkbox"
-                  checked={false}
-                  disabled
-                  aria-describedby="remember-help"
-                />
-
-                <label
-                  className="form-check-label"
-                  htmlFor="remember-session"
-                >
-                  Recordarme
-                </label>
-
-                <span
-                  id="remember-help"
-                  className="visually-hidden"
-                >
-                  Opción no disponible. La sesión
-                  permanece en memoria hasta
-                  su vencimiento. Al recargar,
-                  debes volver a iniciar sesión.
-                </span>
-              </div>
-
               {/* Iniciar sesión */}
               <button
                 type="submit"
@@ -343,22 +311,11 @@ export default function Login() {
                 <DemoAccounts />
               )}
 
-              {/* Recuperación */}
-              <div className="recovery-option">
-                <button
-                  type="button"
-                  className="forgot-password"
-                  disabled
-                  aria-describedby="recovery-help"
-                >
-                  ¿Olvidaste tu contraseña?
-                </button>
-
-                <span id="recovery-help">
-                  Recuperación no disponible.
-                  Contacta al administrador.
-                </span>
-              </div>
+              {/* Recuperación: no hay autoservicio */}
+              <p className="recovery-option">
+                ¿Olvidaste tu contraseña? Pide al administrador
+                que la restablezca.
+              </p>
 
               {/* Mensajes del login */}
               <div
@@ -381,7 +338,7 @@ export default function Login() {
               aria-label="Solicitudes de cambio sin iniciar sesión"
             >
               <div className="public-access-divider">
-                <span>¿No tienes una cuenta?</span>
+                <span>¿Eres cliente? No necesitas cuenta</span>
               </div>
 
               <div className="public-access-content">

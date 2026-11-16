@@ -27,6 +27,7 @@ public sealed class SqlSolicitudesPublicasRepository(
     {
         var sistemas = new List<CatalogoPublicoItem>();
         var prioridades = new List<CatalogoPublicoItem>();
+        var modulos = new List<ModuloPublicoItem>();
 
         await using var conexion = NuevaConexion();
         await conexion.OpenAsync(ct);
@@ -40,6 +41,11 @@ public sealed class SqlSolicitudesPublicasRepository(
             SELECT IdPrioridad, Nombre
             FROM dbo.Prioridad
             ORDER BY IdPrioridad;
+
+            SELECT IdModulo, IdSistema, Nombre
+            FROM dbo.ModuloSistema
+            WHERE Activo = 1
+            ORDER BY IdSistema, Nombre;
             """,
             conexion
         );
@@ -69,9 +75,23 @@ public sealed class SqlSolicitudesPublicasRepository(
             );
         }
 
+        await lector.NextResultAsync(ct);
+
+        while (await lector.ReadAsync(ct))
+        {
+            modulos.Add(
+                new ModuloPublicoItem(
+                    lector.GetInt32(0),
+                    lector.GetInt32(1),
+                    lector.GetString(2)
+                )
+            );
+        }
+
         return new CatalogosPublicosResponse(
             sistemas,
-            prioridades
+            prioridades,
+            modulos
         );
     }
 
@@ -112,6 +132,36 @@ public sealed class SqlSolicitudesPublicasRepository(
             idSistemaPorClasificar = Convert.ToInt32(resultado);
         }
 
+        // Si eligio un modulo del catalogo, se toma su sistema.
+        var idSistemaSolicitud = idSistemaPorClasificar;
+        var moduloSolicitud = s.ModuloAfectado;
+
+        if (s.IdModulo is not null)
+        {
+            await using var obtenerModulo = new SqlCommand(
+                """
+                SELECT TOP (1) IdSistema, Nombre
+                FROM dbo.ModuloSistema
+                WHERE IdModulo = @IdModulo AND Activo = 1;
+                """,
+                conexion
+            );
+
+            obtenerModulo.Parameters.Add(
+                "@IdModulo", SqlDbType.Int
+            ).Value = s.IdModulo.Value;
+
+            await using (var lectorModulo =
+                await obtenerModulo.ExecuteReaderAsync(ct))
+            {
+                if (await lectorModulo.ReadAsync(ct))
+                {
+                    idSistemaSolicitud = lectorModulo.GetInt32(0);
+                    moduloSolicitud = lectorModulo.GetString(1);
+                }
+            }
+        }
+
         await using var comando = new SqlCommand(
             "dbo.sp_CrearSolicitud",
             conexion
@@ -130,7 +180,7 @@ public sealed class SqlSolicitudesPublicasRepository(
 
         comando.Parameters.Add(
             "@IdSistema", SqlDbType.Int
-        ).Value = idSistemaPorClasificar;
+        ).Value = idSistemaSolicitud;
 
         comando.Parameters.Add(
             "@IdPrioridad", SqlDbType.TinyInt
@@ -158,7 +208,11 @@ public sealed class SqlSolicitudesPublicasRepository(
 
         comando.Parameters.Add(
             "@ModuloAfectado", SqlDbType.NVarChar, 150
-        ).Value = Valor(s.ModuloAfectado);
+        ).Value = Valor(moduloSolicitud);
+
+        comando.Parameters.Add(
+            "@EstadoDeseado", SqlDbType.NVarChar, 2000
+        ).Value = Valor(s.EstadoDeseado);
 
         comando.Parameters.Add(
             "@VersionSoftware", SqlDbType.NVarChar, 50
@@ -392,7 +446,7 @@ public sealed class SqlSolicitudesPublicasRepository(
 
         await insertar.ExecuteNonQueryAsync(ct);
 
-        // Regresa la solicitud a revisión y registra el historial.
+        // Regresa la solicitud directo al comité y registra el historial.
         await using var estado = new SqlCommand(
             "dbo.sp_CambiarEstado",
             conexion,
@@ -408,7 +462,7 @@ public sealed class SqlSolicitudesPublicasRepository(
 
         estado.Parameters.Add(
             "@Codigo", SqlDbType.VarChar, 20
-        ).Value = "ENVIADA";
+        ).Value = "EN_COMITE";
 
         estado.Parameters.Add(
             "@Actor", SqlDbType.NVarChar, 150

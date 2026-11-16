@@ -1,17 +1,16 @@
 
-function mostrar(dato) {
-  if (dato === null || dato === undefined || dato === '') {
-    return 'No especificado'
-  }
+const vacio = (dato) =>
+  dato === null || dato === undefined || dato === ''
 
-  return String(dato)
-}
-
+// Solo se dibuja si tiene información: así no aparecen filas
+// de "No especificado" que no aportan nada.
 function Campo({ nombre, dato }) {
+  if (vacio(dato)) return null
+
   return (
     <div className="uf-analysis-row">
       <b>{nombre}</b>
-      <p className="uf-pre">{mostrar(dato)}</p>
+      <p className="uf-pre">{String(dato)}</p>
     </div>
   )
 }
@@ -27,11 +26,25 @@ export default function ResumenSolicitudAmpliada({ solicitud }) {
     ? solicitud.riesgosIniciales.split(';').join('\n• ')
     : ''
 
+  const hayDatos = [
+    solicitud.tipoMantenimiento,
+    solicitud.componentesAfectados,
+    solicitud.consecuenciaNoHacer,
+    impacto[solicitud.idImpactoSolicitado],
+    impacto[solicitud.urgencia],
+    riesgos,
+    solicitud.costoEstimadoSolicitado,
+    solicitud.dependenciasPrevias,
+    solicitud.ramaSugerida,
+    solicitud.archivosSugeridos,
+  ].some((dato) => !vacio(dato))
+
+  // Las solicitudes públicas no traen datos técnicos.
+  if (!hayDatos) return null
+
   return (
     <details className="uf-request-extra">
-      <summary>
-        Ver clasificación, componentes e impacto solicitado
-      </summary>
+      <summary>Ver datos técnicos de la solicitud</summary>
 
       <div className="uf-form-grid mt-3">
         <Campo
@@ -42,16 +55,6 @@ export default function ResumenSolicitudAmpliada({ solicitud }) {
         <Campo
           nombre="Componentes afectados"
           dato={solicitud.componentesAfectados?.split(';').join(', ')}
-        />
-
-        <Campo
-          nombre="Componentes asociados"
-          dato={solicitud.componentesAsociados}
-        />
-
-        <Campo
-          nombre="Estado deseado"
-          dato={solicitud.estadoDeseado}
         />
 
         <Campo
@@ -67,11 +70,6 @@ export default function ResumenSolicitudAmpliada({ solicitud }) {
         <Campo
           nombre="Urgencia solicitada"
           dato={impacto[solicitud.urgencia]}
-        />
-
-        <Campo
-          nombre="Usuarios o áreas afectadas"
-          dato={solicitud.usuariosAfectados}
         />
 
         <Campo

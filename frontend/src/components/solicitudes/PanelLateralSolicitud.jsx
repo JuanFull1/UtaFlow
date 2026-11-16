@@ -102,7 +102,7 @@ export default function PanelLateralSolicitud({
             </div>
           )}
 
-          {puedeVotar && detalle.analisis && (
+          {puedeVotar && (
             <form
               className="uf-form mt-3"
               onSubmit={onRegistrarVoto}

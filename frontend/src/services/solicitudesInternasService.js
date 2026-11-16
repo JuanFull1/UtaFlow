@@ -54,6 +54,46 @@ export const solicitudesInternasService = {
     })
   },
 
+  ciclo(id) {
+    return apiAutenticada(`${BASE}/${id}/ciclo`)
+  },
+
+  actividadGitHub(id) {
+    return apiAutenticada(`${BASE}/${id}/github`)
+  },
+
+  iniciarImplementacion(id) {
+    return apiAutenticada(`${BASE}/${id}/ciclo/iniciar`, {
+      method: 'POST',
+      body: {},
+    })
+  },
+
+  registrarImplementacion(id, datos) {
+    return apiAutenticada(`${BASE}/${id}/ciclo/implementacion`, {
+      method: 'POST',
+      body: datos,
+    })
+  },
+
+  registrarRevision(id, datos) {
+    return apiAutenticada(`${BASE}/${id}/ciclo/revision`, {
+      method: 'POST',
+      body: datos,
+    })
+  },
+
+  cerrarCambio(id, datos) {
+    return apiAutenticada(`${BASE}/${id}/ciclo/cierre`, {
+      method: 'POST',
+      body: datos,
+    })
+  },
+
+  reporteEstado() {
+    return apiAutenticada(`${BASE}/reporte-estado`)
+  },
+
   formalizarDecision(id, datos) {
     return apiAutenticada(`${BASE}/${id}/decision-final`, {
       method: 'POST',

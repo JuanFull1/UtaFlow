@@ -45,12 +45,6 @@ const MANTENIMIENTOS = [
   },
 ]
 
-const NIVELES = [
-  { valor: '1', etiqueta: 'Bajo' },
-  { valor: '2', etiqueta: 'Medio' },
-  { valor: '3', etiqueta: 'Alto' },
-]
-
 const COMPONENTES = [
   'Frontend / interfaz web',
   'API / backend',
@@ -180,6 +174,10 @@ export default function FormularioSolicitudInterna({
     datos.componentesAfectados || ''
   ).split(';')
 
+  const modulosDelSistema = (catalogos.modulos || []).filter(
+    (m) => String(m.idSistema) === String(datos.idSistema)
+  )
+
   const riesgosActuales = String(
     datos.riesgosIniciales || ''
   ).split(';')
@@ -194,8 +192,8 @@ export default function FormularioSolicitudInterna({
 
       <p className="text-muted">
         {experto
-          ? 'Registra una solicitud técnica con su clasificación, componentes, impacto y evidencias. Después podrás completar la evaluación.'
-          : 'Describe la propuesta, los sistemas afectados y los posibles riesgos. El experto realizará la evaluación técnica antes de enviarla al comité.'}
+          ? 'Registra una solicitud técnica con su clasificación, componentes, impacto y evidencias. Llega directo al comité y después puedes completar tu análisis.'
+          : 'Describe la propuesta, los sistemas afectados y los posibles riesgos. La propuesta llega directo al comité; el experto puede agregar su análisis técnico como apoyo.'}
       </p>
 
       <form className="uf-form" onSubmit={onSubmit}>
@@ -251,11 +249,17 @@ export default function FormularioSolicitudInterna({
                 name="idSistema"
                 required
                 value={datos.idSistema}
-                onChange={onChange}
+                onChange={(e) => {
+                  onChange(e)
+                  // El módulo depende del sistema elegido.
+                  seleccionar('moduloAfectado', '')
+                }}
               >
                 <option value="">Seleccionar sistema</option>
 
-                {catalogos.sistemas.map((s) => (
+                {catalogos.sistemas
+                  .filter((s) => s.nombre !== 'Por clasificar')
+                  .map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.nombre}
                   </option>
@@ -265,25 +269,38 @@ export default function FormularioSolicitudInterna({
 
             <label>
               Módulo afectado
-              <input
-                className="form-control"
+              <select
+                className="form-select"
                 name="moduloAfectado"
-                maxLength={150}
                 value={datos.moduloAfectado}
                 onChange={onChange}
-                placeholder="Ej. Inicio de sesión"
-              />
+                disabled={!datos.idSistema}
+              >
+                <option value="">
+                  {!datos.idSistema
+                    ? 'Primero elige el sistema'
+                    : modulosDelSistema.length
+                      ? 'Sin módulo específico'
+                      : 'Este sistema aún no tiene módulos'}
+                </option>
+
+                {modulosDelSistema.map((m) => (
+                  <option key={m.id} value={m.nombre}>
+                    {m.nombre}
+                  </option>
+                ))}
+              </select>
             </label>
 
             <label>
-              Empresa o área
+              Cooperativa
               <input
                 className="form-control"
                 name="empresaArea"
                 maxLength={150}
                 value={datos.empresaArea}
                 onChange={onChange}
-                placeholder="Ej. Departamento de tecnología"
+                placeholder="Ej. Cooperativa de transporte"
               />
             </label>
 
@@ -354,15 +371,6 @@ export default function FormularioSolicitudInterna({
               </label>
             ))}
           </div>
-
-          <Campo
-            titulo="Componentes asociados"
-            nombre="componentesAsociados"
-            valor={datos.componentesAsociados}
-            onChange={onChange}
-            maxLength={600}
-            filas={2}
-          />
         </div>
 
         {/* 3. DESCRIPCIÓN */}
@@ -425,21 +433,12 @@ export default function FormularioSolicitudInterna({
 
         {/* 4. IMPACTO Y RIESGO */}
         <div className="uf-form-section">
-          <h3>4. Impacto, urgencia y riesgo</h3>
+          <h3>4. Prioridad y riesgo</h3>
 
-          <SelectorTarjetas
-            titulo="Impacto estimado"
-            opciones={NIVELES}
-            valor={datos.idImpacto}
-            onChange={(v) => seleccionar('idImpacto', v)}
-          />
-
-          <SelectorTarjetas
-            titulo="Urgencia estimada"
-            opciones={NIVELES}
-            valor={datos.urgencia}
-            onChange={(v) => seleccionar('urgencia', v)}
-          />
+          <p className="text-muted small">
+            El impacto y el costo los estima el experto en su evaluación
+            técnica.
+          </p>
 
           <label>
             Prioridad de la solicitud *
@@ -480,35 +479,6 @@ export default function FormularioSolicitudInterna({
               </label>
             ))}
           </div>
-
-          <div className="uf-form-grid">
-            <label>
-              Usuarios o áreas afectadas
-              <input
-                className="form-control"
-                name="usuariosAfectados"
-                maxLength={300}
-                value={datos.usuariosAfectados}
-                onChange={onChange}
-                placeholder="Ej. Administradores, operadores"
-              />
-            </label>
-
-            <label>
-              Costo preliminar (USD)
-              <input
-                className="form-control"
-                type="number"
-                name="costoEstimadoSolicitado"
-                min="0"
-                max="9999999999.99"
-                step="0.01"
-                value={datos.costoEstimadoSolicitado}
-                onChange={onChange}
-                placeholder="0.00"
-              />
-            </label>
-          </div>
         </div>
 
         {/* 5. PLANIFICACIÓN INICIAL */}
@@ -524,28 +494,14 @@ export default function FormularioSolicitudInterna({
           />
 
           {experto && (
-            <>
-              <label>
-                Rama GitFlow sugerida
-                <input
-                  className="form-control"
-                  name="ramaSugerida"
-                  maxLength={150}
-                  value={datos.ramaSugerida}
-                  onChange={onChange}
-                  placeholder="feature/actualizar-autenticacion"
-                />
-              </label>
-
-              <Campo
-                titulo="Archivos previstos (una ruta por línea)"
-                nombre="archivosSugeridos"
-                valor={datos.archivosSugeridos}
-                onChange={onChange}
-                maxLength={1000}
-                filas={4}
-              />
-            </>
+            <Campo
+              titulo="Archivos previstos (una ruta por línea)"
+              nombre="archivosSugeridos"
+              valor={datos.archivosSugeridos}
+              onChange={onChange}
+              maxLength={1000}
+              filas={4}
+            />
           )}
 
           <div className="uf-form-grid">
@@ -560,15 +516,6 @@ export default function FormularioSolicitudInterna({
               />
             </label>
           </div>
-
-          <Campo
-            titulo="Comentarios adicionales"
-            nombre="comentariosAdicionales"
-            valor={datos.comentariosAdicionales}
-            onChange={onChange}
-            maxLength={1000}
-            filas={2}
-          />
         </div>
 
         {/* 6. EVIDENCIAS */}

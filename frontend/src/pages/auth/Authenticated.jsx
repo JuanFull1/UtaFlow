@@ -13,6 +13,9 @@ import FormularioEvaluacion from '../../components/solicitudes/FormularioEvaluac
 import FormularioSolicitudInterna from '../../components/solicitudes/FormularioSolicitudInterna.jsx'
 import PanelLateralSolicitud from '../../components/solicitudes/PanelLateralSolicitud.jsx'
 import DecisionColectiva from '../../components/solicitudes/DecisionColectiva.jsx'
+import CicloCambio from '../../components/solicitudes/CicloCambio.jsx'
+import ReporteEstado from '../../components/solicitudes/ReporteEstado.jsx'
+import TablaIssues from '../../components/solicitudes/TablaIssues.jsx'
 import ResumenSolicitudAmpliada from '../../components/solicitudes/ResumenSolicitudAmpliada.jsx'
 
 import './PanelSolicitudes.css'
@@ -66,13 +69,11 @@ const NUEVA_INICIAL = {
   fechaLimite: '',
   tipoMantenimiento: '',
   componentesAfectados: '',
-  componentesAsociados: '',
   estadoDeseado: '',
   consecuenciaNoHacer: '',
   idImpacto: '',
   urgencia: '',
   riesgosIniciales: '',
-  usuariosAfectados: '',
   costoEstimadoSolicitado: '',
   dependenciasPrevias: '',
   archivosSugeridos: '',
@@ -142,11 +143,33 @@ function estadoFinal(codigo) {
   return ['APROBADA', 'RECHAZADA'].includes(codigo)
 }
 
+// El experto puede registrar su análisis mientras la solicitud
+// está en el comité (apoyo opcional) o si se la devolvieron.
 function requiereExperto(codigo) {
   return [
     'ENVIADA',
     'PENDIENTE_EXPERTO',
+    'EN_COMITE',
   ].includes(codigo)
+}
+
+// Etapas posteriores a la aprobación.
+function expertoCiclo(s) {
+  return ['APROBADA', 'EN_IMPLEMENTACION'].includes(s.estadoCodigo)
+}
+
+function comiteCiclo(s) {
+  return s.estadoCodigo === 'EN_REVISION'
+}
+
+// Qué solicitudes esperan realmente al experto:
+// las devueltas y las que aún no tienen su análisis.
+function expertoPendiente(s) {
+  return (
+    ['ENVIADA', 'PENDIENTE_EXPERTO'].includes(s.estadoCodigo) ||
+    (s.estadoCodigo === 'EN_COMITE' && !s.tieneAnalisis) ||
+    expertoCiclo(s)
+  )
 }
 
 function requiereComite(codigo) {
@@ -508,13 +531,11 @@ export default function Authenticated() {
         fechaLimite: nueva.fechaLimite || null,
         tipoMantenimiento: nueva.tipoMantenimiento,
         componentesAfectados: nueva.componentesAfectados || null,
-        componentesAsociados: nueva.componentesAsociados.trim() || null,
         estadoDeseado: nueva.estadoDeseado.trim() || null,
         consecuenciaNoHacer: nueva.consecuenciaNoHacer.trim() || null,
         idImpacto: nueva.idImpacto ? Number(nueva.idImpacto) : null,
         urgencia: nueva.urgencia ? Number(nueva.urgencia) : null,
         riesgosIniciales: nueva.riesgosIniciales || null,
-        usuariosAfectados: nueva.usuariosAfectados.trim() || null,
         costoEstimadoSolicitado:
           nueva.costoEstimadoSolicitado === ''
             ? null
@@ -916,12 +937,12 @@ export default function Authenticated() {
 
   const pendientes = solicitudes.filter((s) =>
     experto
-      ? requiereExperto(s.estadoCodigo)
-      : requiereComite(s.estadoCodigo)
+      ? expertoPendiente(s)
+      : requiereComite(s.estadoCodigo) || comiteCiclo(s)
   ).length
 
   const resueltas = solicitudes.filter((s) =>
-    estadoFinal(s.estadoCodigo)
+    ['CERRADA', 'RECHAZADA'].includes(s.estadoCodigo)
   ).length
 
   const solicitudesFiltradas = solicitudes.filter((s) => {
@@ -930,13 +951,13 @@ export default function Authenticated() {
     }
 
     if (filtroLista === 'decididas') {
-      return estadoFinal(s.estadoCodigo)
+      return estadoFinal(s.estadoCodigo) || s.estadoCodigo === 'CERRADA'
     }
 
     if (filtroLista === 'pendientes') {
       return experto
-        ? requiereExperto(s.estadoCodigo)
-        : requiereComite(s.estadoCodigo)
+        ? expertoPendiente(s)
+        : requiereComite(s.estadoCodigo) || comiteCiclo(s)
     }
 
     return true
@@ -1004,6 +1025,26 @@ export default function Authenticated() {
               ? 'Nueva solicitud técnica'
               : 'Proponer un cambio'}
           </button>
+
+          <button
+            type="button"
+            className={
+              vista === 'issues' ? 'activo' : ''
+            }
+            onClick={() => setVista('issues')}
+          >
+            Cambios (issues)
+          </button>
+
+          <button
+            type="button"
+            className={
+              vista === 'reporte' ? 'activo' : ''
+            }
+            onClick={() => setVista('reporte')}
+          >
+            Reporte de estado
+          </button>
         </nav>
 
         <div className="uf-sidebar-footer">
@@ -1059,6 +1100,10 @@ export default function Authenticated() {
                   ? 'Evaluación de la solicitud'
                   : 'Revisión del comité'
               )}
+
+              {vista === 'issues' && 'Cambios'}
+
+              {vista === 'reporte' && 'Reporte de estado'}
             </h1>
           </div>
 
@@ -1096,6 +1141,15 @@ export default function Authenticated() {
 
         {cargando && (
           <p>Cargando solicitudes…</p>
+        )}
+
+        {vista === 'reporte' && <ReporteEstado />}
+
+        {!cargando && vista === 'issues' && (
+          <TablaIssues
+            solicitudes={solicitudes}
+            onAbrir={abrirSolicitud}
+          />
         )}
 
         {/* ==========================================
@@ -1199,7 +1253,7 @@ export default function Authenticated() {
                         <strong>{s.asunto}</strong>
 
                         <small className="d-block text-muted">
-                          {s.codigo}
+                          {s.identificador || s.codigo}
                         </small>
                       </td>
 
@@ -1293,7 +1347,7 @@ export default function Authenticated() {
 
                 <div className="uf-detail-heading">
                   <div>
-                    <small>{solicitud.codigo}</small>
+                    <small>{solicitud.identificador || solicitud.codigo}</small>
 
                     <h2>{solicitud.asunto}</h2>
 
@@ -1352,26 +1406,26 @@ export default function Authenticated() {
                 </p>
 
                 <div className="uf-facts">
-                  <div>
-                    <b>Empresa o área</b>
-                    <span>
-                      {valor(solicitud.empresaArea)}
-                    </span>
-                  </div>
+                  {solicitud.empresaArea && (
+                    <div>
+                      <b>Cooperativa</b>
+                      <span>{solicitud.empresaArea}</span>
+                    </div>
+                  )}
 
-                  <div>
-                    <b>Módulo afectado</b>
-                    <span>
-                      {valor(solicitud.moduloAfectado)}
-                    </span>
-                  </div>
+                  {solicitud.moduloAfectado && (
+                    <div>
+                      <b>Módulo afectado</b>
+                      <span>{solicitud.moduloAfectado}</span>
+                    </div>
+                  )}
 
-                  <div>
-                    <b>Versión del software</b>
-                    <span>
-                      {valor(solicitud.versionSoftware)}
-                    </span>
-                  </div>
+                  {solicitud.versionSoftware && (
+                    <div>
+                      <b>Versión del software</b>
+                      <span>{solicitud.versionSoftware}</span>
+                    </div>
+                  )}
 
                   <div>
                     <b>Tipo ITIL</b>
@@ -1398,6 +1452,16 @@ export default function Authenticated() {
                   </>
                 )}
 
+                {solicitud.estadoDeseado && (
+                  <>
+                    <h3>Cómo se espera que quede</h3>
+
+                    <p className="uf-pre">
+                      {solicitud.estadoDeseado}
+                    </p>
+                  </>
+                )}
+
                 {solicitud.comentariosAdicionales && (
                   <>
                     <h3>Comentarios del solicitante</h3>
@@ -1417,7 +1481,9 @@ export default function Authenticated() {
                 />
 
                 {Number(usuario.id) === Number(solicitud.idSolicitante) &&
-                  solicitud.estadoCodigo === 'ENVIADA' && (
+                  ['ENVIADA', 'EN_COMITE'].includes(
+                    solicitud.estadoCodigo
+                  ) && (
                   <div className="mt-3">
                     <label className="form-label fw-semibold">
                       Agregar nuevas evidencias
@@ -1453,6 +1519,7 @@ export default function Authenticated() {
                     detalle.analisis?.recomendacion
                   )}
                   editado={analisisEditado}
+                  yaEnComite={estado === 'EN_COMITE'}
                 />
               )}
 
@@ -1535,9 +1602,9 @@ export default function Authenticated() {
 
                   {!detalle.analisis ? (
                     <div className="alert alert-info">
-                      Esta solicitud todavía no tiene
-                      evaluación técnica. Debe pasar
-                      primero por el EXPERTO.
+                      El experto todavía no agregó su análisis
+                      técnico. Puedes votar ahora; si lo agrega,
+                      aparecerá aquí como apoyo.
                     </div>
                   ) : (
                     <>
@@ -1691,6 +1758,15 @@ export default function Authenticated() {
               {/* ======================================
                   COMITE: DECISION COLECTIVA
               ====================================== */}
+
+              <CicloCambio
+                solicitud={detalle.solicitud}
+                versionPrevista={detalle.decisionComite?.versionPrevista}
+                experto={experto}
+                comite={comite}
+                ocupado={ocupado}
+                ejecutar={ejecutar}
+              />
 
               {comite && (
                 <DecisionColectiva

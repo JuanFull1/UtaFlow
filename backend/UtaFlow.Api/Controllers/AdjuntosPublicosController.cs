@@ -165,6 +165,7 @@ public sealed class AdjuntosPublicosController(
               AND s.Origen = 'PUBLICO'
               AND e.Codigo IN (
                   'ENVIADA',
+                  'EN_COMITE',
                   'PENDIENTE_CLIENTE'
               );
             """;

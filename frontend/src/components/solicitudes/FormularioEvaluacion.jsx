@@ -91,6 +91,7 @@ export default function FormularioEvaluacion({
   ocupado,
   guardado,
   editado,
+  yaEnComite = false,
 }) {
   function cambiarSeleccion(nombre, valor) {
     onChange({
@@ -347,26 +348,34 @@ export default function FormularioEvaluacion({
             {ocupado ? 'Guardando…' : 'Guardar evaluación'}
           </button>
 
-          <button
-            type="button"
-            className="btn btn-outline-primary"
-            disabled={
-              ocupado ||
-              !guardado ||
-              editado
-            }
-            onClick={onEnviar}
-          >
-            Enviar al comité
-          </button>
+          {!yaEnComite && (
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              disabled={
+                ocupado ||
+                !guardado ||
+                editado
+              }
+              onClick={onEnviar}
+            >
+              Enviar al comité
+            </button>
+          )}
         </div>
 
         <p className="uf-hint">
-          {editado
-            ? 'Tienes cambios sin guardar. Guarda la evaluación antes de enviarla.'
-            : guardado
-              ? 'La evaluación está guardada y puede enviarse al comité.'
-              : 'Primero guarda la evaluación técnica.'}
+          {yaEnComite
+            ? editado
+              ? 'Tienes cambios sin guardar. Guarda tu análisis para que el comité lo vea.'
+              : guardado
+                ? 'Tu análisis está guardado y el comité ya puede verlo. Puedes actualizarlo cuando quieras.'
+                : 'La solicitud ya está en el comité. Tu análisis es un apoyo opcional para su decisión.'
+            : editado
+              ? 'Tienes cambios sin guardar. Guarda la evaluación antes de enviarla.'
+              : guardado
+                ? 'La evaluación está guardada y puede enviarse al comité.'
+                : 'Primero guarda la evaluación técnica.'}
         </p>
       </form>
     </section>

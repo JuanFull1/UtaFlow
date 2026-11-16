@@ -21,6 +21,12 @@ public sealed class CrearSolicitudPublicaRequest
     [StringLength(150)]
     public string? ModuloAfectado { get; set; }
 
+    // Modulo elegido del catalogo; define tambien el sistema.
+    public int? IdModulo { get; set; }
+
+    [StringLength(2000)]
+    public string? EstadoDeseado { get; set; }
+
     // La version del software la identifica posteriormente el experto.
 
     [Required, StringLength(200)]
@@ -64,9 +70,16 @@ public record CatalogoPublicoItem(
     string Nombre
 );
 
+public record ModuloPublicoItem(
+    int Id,
+    int IdSistema,
+    string Nombre
+);
+
 public record CatalogosPublicosResponse(
     IReadOnlyList<CatalogoPublicoItem> Sistemas,
-    IReadOnlyList<CatalogoPublicoItem> Prioridades
+    IReadOnlyList<CatalogoPublicoItem> Prioridades,
+    IReadOnlyList<ModuloPublicoItem> Modulos
 );
 
 public record MensajePublicoResponse(
