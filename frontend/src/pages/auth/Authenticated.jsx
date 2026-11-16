@@ -1572,9 +1572,9 @@ export default function Authenticated() {
 
                   {!detalle.analisis ? (
                     <div className="alert alert-info">
-                      Esta solicitud todavía no tiene
-                      evaluación técnica. Debe pasar
-                      primero por el EXPERTO.
+                      El experto todavía no agregó su análisis
+                      técnico. Puedes votar ahora; si lo agrega,
+                      aparecerá aquí como apoyo.
                     </div>
                   ) : (
                     <>
